@@ -3,7 +3,14 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "test-coverage": "jest --collect-coverage",
+        "reg": "npm set registry http://npm.lumigame.com",
+        "pub": "npm publish --registry http://npm.lumigame.com",
+        "betaver": "npm version prerelease --preid beta",
+        "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
+        "semantic-release": "semantic-release",
+        "prepare-husky": "husky"
     },
     "repository": {
         "type": "git",
