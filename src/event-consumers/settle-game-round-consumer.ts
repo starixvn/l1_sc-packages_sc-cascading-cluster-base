@@ -4,12 +4,14 @@ import RoundCalculator from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
 import FreeSpinsConsumer from "./free-spins-consumer";
 import TotalMultiplierConsumer from "./total-multiplier-consumer";
+import { SlotGameDefinition } from "sc-slot-game-base";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
     declare gameData: CascadingClusterGameData;
     declare roundCalculator: RoundCalculator;
     declare freeSpinsConsumer: FreeSpinsConsumer;
     declare totalMultiplierConsumer: TotalMultiplierConsumer;
+    declare definition: SlotGameDefinition;
 
     constructor({
         definition,
@@ -40,7 +42,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         this.roundCalculator = roundCalculator;
     }
 
-    async settleRound(player: any, roundId: number) {
+    async settlePlayerRound(player: any, roundId: number) {
         const round = await this.queryRound(roundId);
 
         if (round) {
@@ -116,7 +118,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         return this.roundsRepository.findOne({ id: roundId, paid: false }).exec();
     }
 
-    calculateBetResult(round) {
+    calculateBetResult(round): any {
         const { bigWinRatio } = this.gameData.gameConfigs.cascadingClusterConfig;
 
         const betResult = {
@@ -133,7 +135,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         return betResult;
     }
 
-    collectRoundResult(player, round, betResult) {
+    collectRoundResult(player, round, betResult): any {
         return {
             finish: {
                 roundId: round.id,

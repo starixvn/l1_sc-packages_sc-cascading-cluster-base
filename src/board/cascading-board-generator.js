@@ -11,7 +11,7 @@ export default class CascadingBoardGenerator {
     }
 
     initialize() {
-        const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingSlotsConfig;
+        const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingClusterConfig;
 
         this.multiplierBonus = multiplierBonus;
         this.difficulty = difficulty;

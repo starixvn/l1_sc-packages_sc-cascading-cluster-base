@@ -1,5 +1,5 @@
 const gameConfigs = {
-    cascadingSlotsConfig: {
+    cascadingClusterConfig: {
         mode: 1,
         oddsByCounts: {
             0: [

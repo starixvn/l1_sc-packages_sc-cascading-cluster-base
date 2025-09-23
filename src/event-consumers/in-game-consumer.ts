@@ -30,12 +30,12 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             jackpotsRepository,
             jackpotValidator,
             userTrackingClient,
-        });
+        } as any);
 
         this.promotionApiClient = gamePromotionApiClient.instance();
     }
 
-    async buildPayload(realPlayer: any) {
+    async buildPayload(realPlayer: any): Promise<any> {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === realPlayer.session.currencyGroupId);
         const coinValues = settings?.coinValues;
         const maxWinPerRound = settings?.maxWinPerRound;
@@ -113,7 +113,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         };
     }
 
-    getAvailableFreeSpins(realPlayer: any) {
+    getAvailableFreeSpins(realPlayer: any): any {
         const totalOfFreeSpins = this.freeSpinsConsumer.getTotalAvaiableFreeSpins(realPlayer);
         const soonestExpiredFreeSpin = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(realPlayer);
 

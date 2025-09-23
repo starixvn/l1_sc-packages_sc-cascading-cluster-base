@@ -4,10 +4,10 @@ import { Crons } from "sc-slot-game-base";
 export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
     async generateBetInfo(payload, freeSpinInfo) {
         const betInfo = { ...payload };
-        const { cascadingSlotsConfig } = this.gameData.gameConfigs;
-        const contributionRate = cascadingSlotsConfig.jackpot ? cascadingSlotsConfig.jackpot.playerContributionRatio : 0;
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
+        const contributionRate = cascadingClusterConfig.jackpot ? cascadingClusterConfig.jackpot.playerContributionRatio : 0;
 
-        betInfo.betMultiplier = cascadingSlotsConfig.betMultiplier;
+        betInfo.betMultiplier = cascadingClusterConfig.betMultiplier;
 
         if (freeSpinInfo) {
             const { betLevel, coinValue, betMultiplier } = freeSpinInfo;
@@ -25,7 +25,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     }
 
     async upsertBet(player, roundId, bet, rate, applicableInterceptors) {
-        const { cascadingSlotsConfig } = this.gameData.gameConfigs;
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         let newBet = {
             id: roundId,
@@ -41,8 +41,8 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             rate: rate,
             exchangeRateId: this.gameData.exchangeRates.exId,
             odds: {
-                oddsByCounts: cascadingSlotsConfig.oddsByCounts,
-                freeSpins: cascadingSlotsConfig.freeSpins,
+                oddsByCounts: cascadingClusterConfig.oddsByCounts,
+                freeSpins: cascadingClusterConfig.freeSpins,
             },
         };
 
@@ -76,7 +76,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         await this.upsertBet(player, roundId, bet, rate, applicableInterceptors);
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
-        const { betwin } = await this.settleGameRoundConsumer.settleRound(player, roundId);
+        const { betwin } = await this.settleGameRoundConsumer.settlePlayerRound(player, roundId);
 
         if (applicableInterceptors) {
             bet.roundId = roundId;

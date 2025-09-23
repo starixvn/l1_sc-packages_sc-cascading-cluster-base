@@ -123,7 +123,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         await super.checkGameStatus();
 
         if (!this.gameData.disabled) {
-            const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingSlotsConfig;
+            const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingClusterConfig;
 
             this.boardGenerator.updateBoardConfig(difficulty, multiplierBonus.min, multiplierBonus.max);
         }

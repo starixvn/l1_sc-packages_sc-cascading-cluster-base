@@ -41,6 +41,8 @@ export default class RoundCalculator {
         this.gameData = gameData;
     }
 
+    public processSpinning(round: any, totalMultiplier: number, maxWinPerRound: number, preGeneratedResult: any) {}
+
     public process(baseBet: number): Result {
         const ngResult = this.generator.generateNormalGameBoard();
         ngResult.tumbles.push(
