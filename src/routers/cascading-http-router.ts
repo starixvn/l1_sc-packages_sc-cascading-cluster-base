@@ -1,12 +1,15 @@
 import { utils } from "sc-common";
 import { Core } from "sc-game-base";
 import defaultDefinition from "../board/default-definition";
+import { TumbleCalculator } from "../board";
+import { CascadingBoardGenerator } from "../board";
+import CascadingClusterGameData from "../game-data";
 
 export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
-    /**
-     * @param {Object} appConfigs
-     * @param {logger} logService
-     */
+    declare tumbleCalculator: TumbleCalculator;
+    declare boardGenerator: CascadingBoardGenerator;
+    declare gameData: CascadingClusterGameData;
+
     constructor(appConfigs, gameData, tumbleCalculator, boardGenerator, logService, historyQuery, metricQuery) {
         super(appConfigs, gameData, historyQuery, metricQuery, logService);
 
@@ -63,12 +66,12 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
     }
 
     generateResultFromAdmin(result) {
-        const { cascadingSlotsConfig } = this.gameData.gameConfigs;
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
         const { base, tumbles } = result;
         const firstTumble = {
             newBoard: base.board,
             multipliers: base.multipliers,
-            icons: this.tumbleCalculator.calculateIconOdds(base.board, cascadingSlotsConfig),
+            icons: this.tumbleCalculator.calculateIconOdds(base.board, cascadingClusterConfig),
         };
 
         const preGeneratedResult = [firstTumble];
@@ -83,8 +86,8 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
                 lastTumble.multipliers
             );
 
-            refilledResult.icons = this.tumbleCalculator.calculateIconOdds(refilledResult.newBoard, cascadingSlotsConfig);
-            preGeneratedResult.push(refilledResult);
+            (refilledResult as any).icons = this.tumbleCalculator.calculateIconOdds(refilledResult.newBoard, cascadingClusterConfig);
+            preGeneratedResult.push(refilledResult as any);
         }
 
         return preGeneratedResult;
