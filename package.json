@@ -1,7 +1,13 @@
 {
     "name": "sc-cascading-cluster-base",
     "version": "1.0.1-beta.2",
-    "main": "src/index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/**/*",
+        "package.json",
+        "README.md"
+    ],
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,7 +17,9 @@
         "betaver": "npm version prerelease --preid beta",
         "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
         "semantic-release": "semantic-release",
-        "prepare-husky": "husky"
+        "prepare-husky": "husky",
+        "build": "tsc",
+        "prepublishOnly": "npm run build"
     },
     "repository": {
         "type": "git",
@@ -25,6 +33,10 @@
         "mathjs": "14.5.3",
         "sc-slot-board-generator": "1.0.1",
         "sc-slot-game-base": "^3.1.1-beta.1"
+    },
+    "resolutions": {
+        "mongoose": "6.13.8",
+        "mongoose-long": "0.8.0"
     },
     "keywords": [],
     "author": "",
