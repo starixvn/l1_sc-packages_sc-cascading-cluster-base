@@ -1,0 +1,59 @@
+import { SlotGameData } from "sc-slot-game-base";
+
+export type GameConfigs = {
+    gameId: number;
+    bot_maxbet: number;
+    botenabled: boolean;
+    cascadingClusterConfig: {
+        bigWinRatio: {
+            big: number;
+            mega: number;
+            super: number;
+        };
+        tileMultiplier: {
+            step: number;
+            max: number;
+        };
+        betLevels: number[];
+        betMultiplier: number;
+        odds: {
+            [key: number]: {
+                from: number;
+                to: number;
+                odds: number;
+            }[];
+        };
+        freeSpins: {
+            initialOdds: {
+                count: number;
+                odds: number;
+            }[];
+        };
+        features: {
+            buyFreeSpins: {
+                enabled: boolean;
+                multiplier: number;
+                siteExclusions: string[];
+            };
+        };
+    };
+    delayStartTime: number;
+    disabled_message: string;
+    disabledround: number;
+    displayName: string;
+    enableFreeBet: boolean;
+    enabled: boolean;
+    exchangeReload: boolean;
+    hour_maxbot: number[];
+    maxWinPerRound: number;
+    maxbet: number;
+    minbet: number;
+    name: string;
+    siteExclusions: string[];
+    time: Date;
+    type: number;
+};
+
+export default class CascadingClusterGameData extends SlotGameData {
+    declare gameConfigs: GameConfigs;
+}

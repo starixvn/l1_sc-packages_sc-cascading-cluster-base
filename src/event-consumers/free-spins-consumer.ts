@@ -1,7 +1,10 @@
 import { EventConsumers } from "sc-slot-game-base";
+import CascadingClusterGameData from "../game-data";
 
 export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer {
-    async gainFreeSpin(player, { roundId, totalAmount, betLevel, coinValue, numberOfFreeSpins }, timeToLive) {
+    declare gameData: CascadingClusterGameData;
+
+    async gainFreeSpin(player, { roundId, totalAmount, betLevel, coinValue, numberOfFreeSpins }: any, timeToLive) {
         const createdTime = new Date();
         const expiryTime = new Date(createdTime.getTime()).setSeconds(createdTime.getSeconds() + timeToLive);
         const memberName = player.profile.name;
@@ -18,7 +21,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
             time: createdTime,
             betLevel,
             coinValue,
-            betMultiplier: this.gameData.gameConfigs.cascadingSlotsConfig.betMultiplier,
+            betMultiplier: this.gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
             expiryTime: player.usePromotion ? player.promotion.endDate : expiryTime,
             ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
         };
