@@ -1,5 +1,6 @@
 module.exports = async () => {
     return {
+        preset: "ts-jest",
         rootDir: "./",
         verbose: true,
         transform: {
