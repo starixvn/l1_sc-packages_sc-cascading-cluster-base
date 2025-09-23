@@ -4,7 +4,7 @@ import RoundCalculator from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
 import FreeSpinsConsumer from "./free-spins-consumer";
 import TotalMultiplierConsumer from "./total-multiplier-consumer";
-import { SlotGameDefinition } from "sc-slot-game-base";
+import { SlotGameDefinition, EventPublishers, EventConsumers } from "sc-slot-game-base";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
     declare gameData: CascadingClusterGameData;
@@ -12,6 +12,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     declare freeSpinsConsumer: FreeSpinsConsumer;
     declare totalMultiplierConsumer: TotalMultiplierConsumer;
     declare definition: SlotGameDefinition;
+    declare jackpotsPublisher: EventPublishers.JackpotPublisher;
 
     constructor({
         definition,

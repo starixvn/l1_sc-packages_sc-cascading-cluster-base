@@ -1,11 +1,14 @@
 import { round } from "mathjs";
 import { Crons } from "sc-slot-game-base";
+import CascadingClusterGameData from "../game-data";
 
 export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
+    declare gameData: CascadingClusterGameData;
     async generateBetInfo(payload, freeSpinInfo) {
+        ///TODO: Review contribution rate
         const betInfo = { ...payload };
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
-        const contributionRate = cascadingClusterConfig.jackpot ? cascadingClusterConfig.jackpot.playerContributionRatio : 0;
+        //const contributionRate = cascadingClusterConfig.jackpot ? cascadingClusterConfig.jackpot.playerContributionRatio : 0;
 
         betInfo.betMultiplier = cascadingClusterConfig.betMultiplier;
 
@@ -18,8 +21,8 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         }
 
         betInfo.totalAmount = round(betInfo.betLevel * betInfo.coinValue * betInfo.betMultiplier, 2);
-        betInfo.contributionRate = round(contributionRate, 4);
-        betInfo.contributionAmount = round(contributionRate * betInfo.totalAmount, 4);
+        //betInfo.contributionRate = round(contributionRate, 4);
+        //betInfo.contributionAmount = round(contributionRate * betInfo.totalAmount, 4);
 
         return betInfo;
     }
@@ -27,7 +30,8 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     async upsertBet(player, roundId, bet, rate, applicableInterceptors) {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
-        let newBet = {
+        ///TODO: Review exchange rate and oddsByCounts
+        let newBet: any = {
             id: roundId,
             uid: player.UID,
             name: player.profile.name,
@@ -39,9 +43,9 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             betMultiplier: bet.betMultiplier,
             totalAmount: bet.totalAmount,
             rate: rate,
-            exchangeRateId: this.gameData.exchangeRates.exId,
+            //exchangeRateId: this.gameData.exchangeRates.exId,
             odds: {
-                oddsByCounts: cascadingClusterConfig.oddsByCounts,
+                //oddsByCounts: cascadingClusterConfig.oddsByCounts,
                 freeSpins: cascadingClusterConfig.freeSpins,
             },
         };

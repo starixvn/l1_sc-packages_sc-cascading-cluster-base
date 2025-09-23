@@ -1,21 +1,22 @@
 import cron from "cron";
-import { Crons } from "sc-slot-game-base";
+import { Crons, SlotGameData, SlotGameDefinition, EventConsumers, EventPublishers } from "sc-slot-game-base";
+import { SlotGameBot } from "sc-slot-game-base/dist/crons";
+import { FreeSpinsConsumer, SettleGameRoundConsumer, TotalMultiplierConsumer } from "../event-consumers";
+import { Core } from "sc-game-base";
+import { CascadingBoardGenerator } from "../board";
+import { Round } from "../models/interfaces";
+import mongoose from "mongoose";
+import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
+import { PromotionFreeSpinsConsumer } from "../event-consumers";
+import CascadingClusterGameData from "../game-data";
+import { CascadingClusterGameDefinition } from "../game-definition";
 
 export default class CascadingGameCron extends Crons.SlotGameCron {
-    /**
-     * @param {Object} dependencies
-     * @param {SlotGameDefinition} dependencies.definition
-     * @param {SlotGameData} dependencies.gameData
-     * @param {SlotGameBot} dependencies.bot
-     * @param {EventConsumers.SettleGameRoundConsumer} dependencies.settleGameRoundConsumer
-     * @param {EventConsumers.FreeSpinsConsumer} dependencies.freeSpinsConsumer
-     * @param {EventConsumers.IdCountersConsumer} dependencies.idCountersConsumer
-     * @param {Core.BaseEventPublishers.GameStatusPublisher} dependencies.gameStatusPublisher
-     * @param {Core.BaseEventPublishers.RunningRoundInfoPublisher} dependencies.runningRoundInfoPublisher
-     * @param {logger} dependencies.logService
-     * @param {mongoose.Model} dependencies.roundsRepository
-     * @param {TotalMultiplierConsumer} dependencies.totalMultiplierConsumer
-     */
+    declare totalMultiplierConsumer: TotalMultiplierConsumer;
+    declare boardGenerator: CascadingBoardGenerator;
+    declare gameData: CascadingClusterGameData;
+    declare definition: CascadingClusterGameDefinition;
+
     constructor({
         definition,
         gameData,
@@ -32,6 +33,22 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         totalMultiplierConsumer,
         boardGenerator,
         promotionFreeSpinsConsumer,
+    }: {
+        definition: SlotGameDefinition;
+        gameData: SlotGameData;
+        bot: SlotGameBot;
+        settleGameRoundConsumer: SettleGameRoundConsumer;
+        freeSpinsConsumer: FreeSpinsConsumer;
+        idCountersConsumer: EventConsumers.IdCountersConsumer;
+        gameStatusPublisher: Core.BaseEventPublishers.GameStatusPublisher;
+        runningRoundInfoPublisher: Core.BaseEventPublishers.RunningRoundInfoPublisher;
+        logService: any;
+        roundsRepository: mongoose.Model<Round>;
+        roundIdConsumer: EventConsumers.IdCountersConsumer;
+        gameManagementApiClientFactory: GameManagementApiClientFactory;
+        totalMultiplierConsumer: TotalMultiplierConsumer;
+        boardGenerator: CascadingBoardGenerator;
+        promotionFreeSpinsConsumer: PromotionFreeSpinsConsumer;
     }) {
         super({
             definition,
@@ -47,7 +64,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
             roundIdConsumer,
             gameManagementApiClientFactory,
             promotionFreeSpinsConsumer,
-        });
+        } as any);
 
         this.totalMultiplierConsumer = totalMultiplierConsumer;
         this.boardGenerator = boardGenerator;
@@ -58,7 +75,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         this.gameData.freeSpinId = await this.idCountersConsumer.getLatestId("freespin");
 
         if (this.gameData.roundId < 1 && this.gameData.freeSpinId < 1) {
-            const { roundId, freeSpinId } = await this.getLastArchiveRound();
+            const { roundId, freeSpinId } = await this.getLastArchiveRound(undefined);
 
             await this.idCountersConsumer.updateLatestId("round", roundId);
             await this.idCountersConsumer.updateLatestId("freespin", freeSpinId);
@@ -123,9 +140,9 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         await super.checkGameStatus();
 
         if (!this.gameData.disabled) {
-            const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingClusterConfig;
-
-            this.boardGenerator.updateBoardConfig(difficulty, multiplierBonus.min, multiplierBonus.max);
+            ///TODO: Update board config
+            //const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingClusterConfig;
+            //this.boardGenerator.updateBoardConfig(difficulty, multiplierBonus.min, multiplierBonus.max);
         }
     }
 
