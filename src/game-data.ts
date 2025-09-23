@@ -15,6 +15,7 @@ export type GameConfigs = {
             max: number;
         };
         betLevels: number[];
+        rageMeters: number[];
         betMultiplier: number;
         odds: {
             [key: number]: {

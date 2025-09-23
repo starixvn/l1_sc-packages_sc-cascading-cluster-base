@@ -41,7 +41,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         const maxWinPerRound = settings?.maxWinPerRound;
         const defaultCoinValue = settings?.defaultCoinValue;
 
-        const { betLevels, betMultiplier, odds, freeSpins: freeSpinsConfig } = this.gameData.gameConfigs.cascadingClusterConfig;
+        const { betLevels, betMultiplier, odds, freeSpins: freeSpinsConfig, features, bigWinRatio, rageMeters } = this.gameData.gameConfigs.cascadingClusterConfig;
         const gameConfigs = {
             coinValues,
             maxWinPerRound,
@@ -49,6 +49,8 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             betMultiplier,
             odds: { symbols: odds, freeSpins: freeSpinsConfig },
             defaultCoinValue,
+            bigWinRatio,
+            rageMeters,
         };
 
         const freeSpins = this.getAvailableFreeSpins(realPlayer);
@@ -59,6 +61,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         const rate = exchangeRates.code[session.currencyCode] * session.multiplier;
 
         const payload = {
+            features,
             gameConfigs,
             freeSpins,
             totalMultiplier: this.gameData.ingame[realPlayer.profile.name]?.totalMultiplier ?? 0,
@@ -116,6 +119,12 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
     getAvailableFreeSpins(realPlayer: any): any {
         const totalOfFreeSpins = this.freeSpinsConsumer.getTotalAvaiableFreeSpins(realPlayer);
         const soonestExpiredFreeSpin = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(realPlayer);
+        // TODO: get buyFreeSpins
+        const buyFreeSpins = false;
+        // TODO: get multiplier
+        const multiplier = [];
+        // TODO: get rageMeterPoint
+        const rageMeterPoint = 0;
 
         return {
             total: totalOfFreeSpins,
@@ -123,6 +132,9 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             coinValue: soonestExpiredFreeSpin?.coinValue,
             betMultiplier: soonestExpiredFreeSpin?.betMultiplier,
             promotionId: soonestExpiredFreeSpin?.promotionId,
+            buyFreeSpins,
+            multiplier,
+            rageMeterPoint
         };
     }
 }
