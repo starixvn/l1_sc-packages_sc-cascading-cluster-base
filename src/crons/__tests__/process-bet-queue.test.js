@@ -153,7 +153,7 @@ describe("cascadingProcessBetQueue", () => {
 
             it("should call freeSpinsConsumer.userFreeSpin", async () => {
                 // Arrange
-                settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betwin: 100 });
+                settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betWin: 100 });
 
                 // Act
                 await consumer.handleSuccessBet(player, balance, roundId, freeSpinBet);
@@ -165,7 +165,7 @@ describe("cascadingProcessBetQueue", () => {
 
         it("should call calculateCurrencyRate", async () => {
             // Arrange
-            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betwin: 100 });
+            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betWin: 100 });
 
             // Act
             await consumer.handleSuccessBet(player, balance, roundId, bet);
@@ -176,7 +176,7 @@ describe("cascadingProcessBetQueue", () => {
 
         it("should call upsertBet", async () => {
             // Arrange
-            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betwin: 100 });
+            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betWin: 100 });
 
             // Act
             await consumer.handleSuccessBet(player, balance, roundId, bet, []);
@@ -187,7 +187,7 @@ describe("cascadingProcessBetQueue", () => {
 
         it("should call notifyPlacingBetResult", async () => {
             // Arrange
-            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betwin: 100 });
+            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betWin: 100 });
 
             // Act
             await consumer.handleSuccessBet(player, balance, roundId, bet, []);
@@ -198,7 +198,7 @@ describe("cascadingProcessBetQueue", () => {
 
         it("should call settleGameRoundConsumer.settleRound", async () => {
             // Arrange
-            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betwin: 100 });
+            settleGameRoundConsumer.settleRound.mockResolvedValueOnce({ betWin: 100 });
 
             // Act
             await consumer.handleSuccessBet(player, balance, roundId, bet, []);

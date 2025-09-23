@@ -15,11 +15,25 @@
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
         "resolveJsonModule": true,
-        "typeRoots": ["./node_modules/@types", "./types"],
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ],
         "noImplicitAny": false,
         "noImplicitReturns": false,
         "noImplicitThis": false
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.test.js", "**/__tests__/**/*", "coverage", "types", "dist", "test-types.ts"]
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.test.js",
+        "**/__tests__/**/*",
+        "coverage",
+        "types",
+        "dist",
+        "test-types.ts",
+        "**/*.test-data.js"
+    ]
 }

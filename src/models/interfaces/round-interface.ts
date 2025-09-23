@@ -8,10 +8,7 @@ export interface Round {
     coinValue: number;
     betLevel: number;
     betMultiplier: number;
-    multiplier: number;
     totalAmount: number;
-    totalTumbleWin: number;
-    totalMultiplier: number;
     freeSpin: boolean;
     reachMaxWin: boolean;
 
@@ -19,7 +16,7 @@ export interface Round {
     settlementResult: any;
 
     odds: any;
-    betwin: number;
+    betWin: number;
     paid: boolean;
     time: Date;
     endTime: Date;

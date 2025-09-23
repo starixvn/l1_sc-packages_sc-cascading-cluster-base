@@ -1,18 +1,20 @@
+import Chance from "chance";
 import FgReels from "./fg-reels";
 import Grid from "./grid";
 import NgReels from "./ng-reels";
 import NgResult from "./ng-result";
 import Result, { ResultCategory } from "./result";
-
 export default class BoardGenerator {
     private readonly gridSize: number = 6;
-    private readonly random = Math.random;
+    private readonly chance: Chance.Chance;
 
-    constructor() {}
+    constructor() {
+        this.chance = new Chance();
+    }
 
     public generateNormalGameBoard(): NgResult {
         const ngResult = new NgResult();
-        ngResult.reelSetIndex = Math.floor(this.genSymbolByWeights(NgReels.reelsIndex, NgReels.weightSum, NgReels.weight));
+        ngResult.reelSetIndex = this.chance.weighted(NgReels.reelsIndex, NgReels.weight);
         this.genGrid(NgReels.reels[ngResult.reelSetIndex], ngResult);
         ngResult.gridMultipliers = this.initializeGridMultiplier();
 
@@ -64,26 +66,12 @@ export default class BoardGenerator {
 
     private genGrid(reelSet: number[][], result: Result): void {
         for (let i = 0; i < this.gridSize; i++) {
-            result.stopIndex[i] = Math.floor(Math.random() * reelSet[i].length);
+            result.stopIndex[i] = this.chance.integer({ min: 0, max: reelSet[i].length - 1 });
             result.reels.push([]);
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = reelSet[i][(result.stopIndex[i] + j) % reelSet[i].length];
                 result.reels[i].push(new Grid(symbol));
             }
         }
-    }
-
-    private genSymbolByWeights(arr: number[], sumWeight: number, weights: number[]): number {
-        const rand = Math.random();
-        let accWeight = weights[0];
-        for (let i = 0; i < weights.length; i++) {
-            if (rand < accWeight / sumWeight) {
-                return arr[i];
-            }
-            if (i + 1 < weights.length) {
-                accWeight += weights[i + 1];
-            }
-        }
-        return arr[arr.length - 1];
     }
 }

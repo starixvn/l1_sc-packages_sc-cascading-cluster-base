@@ -21,6 +21,7 @@ class Result {
     public winScore: number;
     public tumbles: any[]; // Can be further typed based on usage
     public freeSpins: { count: number; odds: number };
+    public reachedMaxWin: boolean;
 
     constructor(category: ResultCategory) {
         this.category = category;

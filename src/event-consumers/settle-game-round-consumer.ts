@@ -1,7 +1,10 @@
 import { round as mathRound } from "mathjs";
+import mongoose from "mongoose";
 import { Core } from "sc-game-base";
+import { SlotGameDefinition } from "sc-slot-game-base";
 import RoundCalculator from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
+import { Round } from "../models/interfaces";
 import FreeSpinsConsumer from "./free-spins-consumer";
 import TotalMultiplierConsumer from "./total-multiplier-consumer";
 import { SlotGameDefinition, EventPublishers, EventConsumers } from "sc-slot-game-base";
@@ -12,6 +15,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     declare freeSpinsConsumer: FreeSpinsConsumer;
     declare totalMultiplierConsumer: TotalMultiplierConsumer;
     declare definition: SlotGameDefinition;
+    declare roundsRepository: mongoose.Model<Round, {}, {}, {}, any>;
     declare jackpotsPublisher: EventPublishers.JackpotPublisher;
 
     constructor({
@@ -62,26 +66,25 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             await this.processFreeSpins(player, round);
             await this.userBetResultPublisher.publishToUser(round.uid, this.collectRoundResult(player, round, betResult));
 
-            return { betwin: round.betwin };
+            return { betWin: round.betWin };
         }
 
-        return { betwin: 0 };
+        return { betWin: 0 };
     }
 
-    async processSpinning(player, round) {
+    async processSpinning(player, round: Round) {
         const currencyGroupSettings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
-        const currentTotalMultiplier = this.totalMultiplierConsumer.getCurrentMultiplier(player);
+        //const currentTotalMultiplier = this.totalMultiplierConsumer.getCurrentMultiplier(player);
         const maxWinPerRound = mathRound(currencyGroupSettings.maxWinPerRound * round.totalAmount, 2);
 
-        round = this.roundCalculator.processSpinning(
+        this.roundCalculator.processSpinning(
             round,
-            currentTotalMultiplier,
-            maxWinPerRound,
-            this.gameData.settlementResultFromAdmin[player.profile.name]
+            maxWinPerRound
+            //this.gameData.settlementResultFromAdmin[player.profile.name]
         );
 
-        if (round.freeSpin && round.betwin > 0 && round.multiplier > 0) {
-            await this.totalMultiplierConsumer.increaseTotalMultiplier(player, { roundId: round.id, multiplier: round.multiplier });
+        if (round.freeSpin && round.betWin > 0) {
+            // await this.totalMultiplierConsumer.increaseTotalMultiplier(player, { roundId: round.id, multiplier: round.multiplier });
         }
 
         delete this.gameData.settlementResultFromAdmin[player.profile.name];
@@ -124,8 +127,8 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
         const betResult = {
             totalBetAmount: round.totalAmount,
-            totalWin: round.betwin,
-            netWin: round.betwin > 0 ? round.betwin - round.totalAmount : 0,
+            totalWin: round.betWin,
+            netWin: round.betWin > 0 ? round.betWin - round.totalAmount : 0,
             totalLost: 0,
             bigWin: false,
         };
@@ -141,7 +144,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             finish: {
                 roundId: round.id,
                 result: round.result,
-                win: round.betwin,
+                win: round.betWin,
                 bigWin: betResult.bigWin,
                 freeSpins: round.settlementResult.freeSpins.odds,
                 totalFreeSpins: this.freeSpinsConsumer.getTotalAvaiableFreeSpins(player),

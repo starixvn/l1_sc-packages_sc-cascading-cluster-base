@@ -1,3 +1,6 @@
+import Chance from "chance";
+import CascadingClusterGameData from "../game-data";
+import { Round } from "../models/interfaces";
 import BoardGenerator from "./board-generator";
 import Config from "./config";
 import Coordinate from "./coordinate";
@@ -30,20 +33,20 @@ export default class RoundCalculator {
 
     private readonly maxPayout: number = 10000;
     private stat: Statistician;
-    private readonly random = Math.random;
     private currScNumber: number;
     private readonly generator: BoardGenerator;
-    private readonly gameData: any;
+    private readonly gameData: CascadingClusterGameData;
+    private readonly chance: Chance.Chance;
 
-    constructor(gameData: any, generator: BoardGenerator) {
+    constructor(gameData: CascadingClusterGameData, generator: BoardGenerator) {
         this.stat = new Statistician();
         this.generator = generator;
         this.gameData = gameData;
+        this.chance = new Chance();
     }
 
-    public processSpinning(round: any, totalMultiplier: number, maxWinPerRound: number, preGeneratedResult: any) {}
-
-    public process(baseBet: number): Result {
+    public processSpinning(round: Round, maxWinPerRound: number): Result {
+        const baseBet = round.coinValue * round.betLevel;
         const ngResult = this.generator.generateNormalGameBoard();
         ngResult.tumbles.push(
             this.recordTumble({
@@ -57,10 +60,9 @@ export default class RoundCalculator {
         let prizeList: Prize[] = [];
         this.calcPrize(ngResult, prizeList);
 
-        while (prizeList.length > 0 && ngResult.winScore < this.maxPayout) {
-            this.stat.ngCascadeFreq++;
+        while (prizeList.length > 0 && ngResult.winScore < maxWinPerRound) {
             const totalPayout = this.calcPayout(prizeList);
-            ngResult.winScore += totalPayout;
+            ngResult.winScore += totalPayout * baseBet;
             ngResult.rageCounter += this.calcRageMeter(prizeList);
             this.updateFeatureTrigger(ngResult);
             this.markDetonated(ngResult, prizeList);
@@ -100,11 +102,24 @@ export default class RoundCalculator {
             }
         }
 
-        ngResult.freeSpins.count = this.countSC(ngResult.reels);
-        this.currScNumber = Math.min(ngResult.freeSpins.count, 6);
-        ngResult.freeSpins.odds = Config.fgRoundsArray[this.currScNumber];
+        ngResult.reachedMaxWin = ngResult.winScore >= maxWinPerRound;
+        this.updateRound(round, ngResult);
 
         return ngResult;
+    }
+
+    updateFreeSpins(result: Result): void {
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
+
+        result.freeSpins.count = this.countSC(result.reels);
+        const freeSpinOdds = cascadingClusterConfig.freeSpins.initialOdds.filter((x) => result.freeSpins.count >= x.count).map((x) => x.odds);
+        result.freeSpins.odds = Math.max(0, ...freeSpinOdds);
+    }
+
+    updateRound(round, result: Result) {
+        round.settlementResult = { tumbles: result.tumbles, freeSpins: result.freeSpins };
+        round.reachMaxWin = result.reachedMaxWin;
+        round.betWin = result.winScore;
     }
 
     private recordTumble(params: {
@@ -219,9 +234,7 @@ export default class RoundCalculator {
         // Rand select 2 col to remove
         const detonatedPositions: Coordinate[] = [];
         const colIndex = [0, 1, 2, 3, 4, 5];
-        this.shuffleArr(colIndex);
-        const col1 = colIndex[0];
-        const col2 = colIndex[1];
+        const [col1, col2] = this.chance.pickset(colIndex, 2);
 
         for (let j = 0; j < this.gridSize; j++) {
             result.gridMultipliers[col1][j]++;
@@ -247,8 +260,8 @@ export default class RoundCalculator {
         }
         // remove 3 x 3 (excl. SC)
         const detonatedPositions: Coordinate[] = [];
-        const x = Math.floor(Math.random() * (this.gridSize - 2));
-        const y = Math.floor(Math.random() * (this.gridSize - 2));
+        const x = this.chance.integer({ min: 0, max: this.gridSize - 3 });
+        const y = this.chance.integer({ min: 0, max: this.gridSize - 3 });
         for (let i = x; i < x + 3; i++) {
             for (let j = y; j < y + 3; j++) {
                 result.gridMultipliers[i][j]++;
@@ -271,11 +284,11 @@ export default class RoundCalculator {
         // randomly remove 6 symbols (excl. SC)
         const detonatedPositions: Coordinate[] = [];
         for (let i = 0; i < 6; i++) {
-            let x = Math.floor(Math.random() * this.gridSize);
-            let y = Math.floor(Math.random() * this.gridSize);
+            let x = this.chance.integer({ min: 0, max: this.gridSize - 1 });
+            let y = this.chance.integer({ min: 0, max: this.gridSize - 1 });
             while (result.reels[x][y].symbol === Config.SC) {
-                x = Math.floor(Math.random() * this.gridSize);
-                y = Math.floor(Math.random() * this.gridSize);
+                x = this.chance.integer({ min: 0, max: this.gridSize - 1 });
+                y = this.chance.integer({ min: 0, max: this.gridSize - 1 });
             }
             result.reels[x][y].isDetonated = true;
             result.gridMultipliers[x][y]++;
@@ -402,18 +415,5 @@ export default class RoundCalculator {
 
     private checkPositionLegit(i: number, j: number): boolean {
         return i >= 0 && j >= 0 && i < this.gridSize && j < this.gridSize;
-    }
-
-    private shuffleArr<T>(deck: T[]): void {
-        // read array from the highest index to lowest
-        for (let i = deck.length - 1; i >= 1; i--) {
-            // generate a random number j such that 0 <= j <= i
-            const j = Math.floor(Math.random() * (i + 1));
-
-            // swap the current element with the randomly generated index
-            const temp = deck[i];
-            deck[i] = deck[j];
-            deck[j] = temp;
-        }
     }
 }

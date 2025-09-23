@@ -82,7 +82,7 @@ function initRoundDocument({ id = 1, playerId, coinValue, betLevel, betMultiplie
         exchangeRateId: 1,
         playerId,
         odds: gameConfigs.cascadingSlotsConfig,
-        betwin: 0,
+        betWin: 0,
         freeSpin,
         multiplier: 0,
         totalMultiplier: 0,
@@ -104,7 +104,7 @@ describe("settle round", () => {
                     newBoard: newBoardAfterExplode,
                 });
             });
-            it("should calcualte betwin correctly", async () => {
+            it("should calcualte betWin correctly", async () => {
                 //Arange
                 const consumer = initConsumer();
                 const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20 });
@@ -114,10 +114,10 @@ describe("settle round", () => {
                 await consumer.settleRound(player, 1);
 
                 //Assert
-                expect(round.betwin).toEqual(round.coinValue * round.betLevel * 1.5 * 2 * 2);
+                expect(round.betWin).toEqual(round.coinValue * round.betLevel * 1.5 * 2 * 2);
             });
 
-            it("betwin should be max win per round when it exceeds the value", async () => {
+            it("betWin should be max win per round when it exceeds the value", async () => {
                 //Arange
                 const consumer = initConsumer();
                 const round = initRoundDocument({ playerId: 1, coinValue: 1, betLevel: 10, betMultiplier: 20 });
@@ -128,7 +128,7 @@ describe("settle round", () => {
                 await consumer.settleRound(player, 1);
 
                 //Assert
-                expect(round.betwin).toEqual(currencyGroupSetting.maxWinPerRound * round.totalAmount);
+                expect(round.betWin).toEqual(currencyGroupSetting.maxWinPerRound * round.totalAmount);
                 expect(round.reachMaxWin).toBeTrue();
                 currencyGroupSetting.maxWinPerRound = 100;
             });
@@ -175,7 +175,7 @@ describe("settle round", () => {
                 expect(round.totalMultiplier).toEqual(6);
             });
 
-            it("should calculate betwin with total multiplier", async () => {
+            it("should calculate betWin with total multiplier", async () => {
                 //Arange
                 const consumer = initConsumer();
 
@@ -183,7 +183,7 @@ describe("settle round", () => {
                 await consumer.settleRound(player, 2);
 
                 //Assert
-                expect(round.betwin).toEqual(0.1 * 5 * 1.5 * 6);
+                expect(round.betWin).toEqual(0.1 * 5 * 1.5 * 6);
             });
 
             afterAll(() => {
