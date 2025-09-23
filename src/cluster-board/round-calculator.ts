@@ -9,7 +9,7 @@ import Prize from "./prize";
 import Result from "./result";
 import Statistician from "./Statistician";
 
-interface TumbleRecord {
+export interface TumbleRecord {
     reels: number[][];
     reelMultipliers: number[][];
     symbols: {
@@ -47,65 +47,64 @@ export default class RoundCalculator {
 
     public processSpinning(round: Round, maxWinPerRound: number): Result {
         const baseBet = round.coinValue * round.betLevel;
-        const ngResult = this.generator.generateNormalGameBoard();
-        ngResult.tumbles.push(
+        const result = this.generator.generateNormalGameBoard();
+        result.tumbles.push(
             this.recordTumble({
-                ngResult,
+                result,
                 prizeList: [],
                 baseBet,
-                totalPayout: 0,
+                win: 0,
                 newSymbols: [],
             })
         );
         let prizeList: Prize[] = [];
-        this.calcPrize(ngResult, prizeList);
+        this.calcPrize(result, prizeList);
 
-        while (prizeList.length > 0 && ngResult.winScore < maxWinPerRound) {
-            const totalPayout = this.calcPayout(prizeList);
-            ngResult.winScore += totalPayout * baseBet;
-            ngResult.rageCounter += this.calcRageMeter(prizeList);
-            this.updateFeatureTrigger(ngResult);
-            this.markDetonated(ngResult, prizeList);
-            const newSymbols = this.generator.detonateAndCascadeBoard(ngResult);
+        while (prizeList.length > 0 && result.winScore < maxWinPerRound) {
+            const win = this.calcPayout(prizeList) * baseBet;
+            result.winScore += win;
+            result.rageCounter += this.calcRageMeter(prizeList);
+            this.updateFeatureTrigger(result);
+            this.markDetonated(result, prizeList);
+            const newSymbols = this.generator.detonateAndCascadeBoard(result);
 
-            ngResult.tumbles.push(
+            result.tumbles.push(
                 this.recordTumble({
-                    ngResult,
+                    result: result,
                     prizeList,
                     baseBet,
-                    totalPayout,
+                    win,
                     newSymbols,
                 })
             );
 
-            this.renewGrid(ngResult.reels);
+            this.renewGrid(result.reels);
             prizeList.length = 0;
-            this.calcPrize(ngResult, prizeList);
+            this.calcPrize(result, prizeList);
 
-            while (prizeList.length === 0 && !ngResult.isQueueEmpty()) {
+            while (prizeList.length === 0 && !result.isQueueEmpty()) {
                 // Process Rage Meter
-                const { feature, triggeredPositions } = this.processRageMeter(ngResult);
+                const { feature, triggeredPositions } = this.processRageMeter(result);
 
-                ngResult.tumbles.push(
+                result.tumbles.push(
                     this.recordTumble({
-                        ngResult,
+                        result: result,
                         prizeList,
                         baseBet,
-                        totalPayout: 0,
+                        win: 0,
                         triggeredStage: feature,
                         triggeredPositions,
                     })
                 );
 
-                this.renewGrid(ngResult.reels);
-                this.calcPrize(ngResult, prizeList);
+                this.renewGrid(result.reels);
+                this.calcPrize(result, prizeList);
             }
         }
+        this.updateFreeSpins(result);
+        this.updateRound(round, result, maxWinPerRound);
 
-        ngResult.reachedMaxWin = ngResult.winScore >= maxWinPerRound;
-        this.updateRound(round, ngResult);
-
-        return ngResult;
+        return result;
     }
 
     updateFreeSpins(result: Result): void {
@@ -116,27 +115,28 @@ export default class RoundCalculator {
         result.freeSpins.odds = Math.max(0, ...freeSpinOdds);
     }
 
-    updateRound(round, result: Result) {
+    updateRound(round, result: Result, maxWinPerRound: number) {
         round.settlementResult = { tumbles: result.tumbles, freeSpins: result.freeSpins };
-        round.reachMaxWin = result.reachedMaxWin;
-        round.betWin = result.winScore;
+        round.reachMaxWin = result.winScore >= maxWinPerRound;
+        round.betWin = Math.min(result.winScore, maxWinPerRound);
+        round.actualBetwin = result.winScore;
     }
 
     private recordTumble(params: {
-        ngResult: Result;
+        result: Result;
         prizeList: Prize[];
         baseBet: number;
-        totalPayout: number;
+        win: number;
         triggeredStage?: number;
         triggeredPositions?: Coordinate[];
         newSymbols?: number[][];
     }): TumbleRecord {
-        const { ngResult, prizeList, baseBet, totalPayout, triggeredStage, triggeredPositions, newSymbols } = params;
+        const { result, prizeList, baseBet, win, triggeredStage, triggeredPositions, newSymbols } = params;
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         return {
-            reels: ngResult.reels.map((row) => row.map((grid) => grid.symbol)),
-            reelMultipliers: ngResult.gridMultipliers.map((row) =>
+            reels: result.reels.map((row) => row.map((grid) => grid.symbol)),
+            reelMultipliers: result.gridMultipliers.map((row) =>
                 row.map((multi) =>
                     multi > 0 ? Math.max(multi * cascadingClusterConfig.tileMultiplier.step, cascadingClusterConfig.tileMultiplier.max) : multi
                 )
@@ -152,8 +152,8 @@ export default class RoundCalculator {
                 odds: prize.odds,
                 win: prize.winScore * baseBet,
             })),
-            win: totalPayout * baseBet,
-            rageMeter: ngResult.rageCounter,
+            win,
+            rageMeter: result.rageCounter,
             triggeredStage,
             triggeredPositions,
             newSymbols,

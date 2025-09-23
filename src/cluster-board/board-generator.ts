@@ -12,7 +12,7 @@ export default class BoardGenerator {
         this.chance = new Chance();
     }
 
-    public generateNormalGameBoard(): NgResult {
+    public generateNormalGameBoard(): Result {
         const ngResult = new NgResult();
         ngResult.reelSetIndex = this.chance.weighted(NgReels.reelsIndex, NgReels.weight);
         this.genGrid(NgReels.reels[ngResult.reelSetIndex], ngResult);

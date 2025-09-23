@@ -1,13 +1,12 @@
 import { round as mathRound } from "mathjs";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
-import { SlotGameDefinition } from "sc-slot-game-base";
-import RoundCalculator from "../cluster-board/round-calculator";
+import { EventPublishers, SlotGameDefinition } from "sc-slot-game-base";
+import RoundCalculator, { TumbleRecord } from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
 import { Round } from "../models/interfaces";
 import FreeSpinsConsumer from "./free-spins-consumer";
 import TotalMultiplierConsumer from "./total-multiplier-consumer";
-import { SlotGameDefinition, EventPublishers, EventConsumers } from "sc-slot-game-base";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
     declare gameData: CascadingClusterGameData;
@@ -148,18 +147,16 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 bigWin: betResult.bigWin,
                 freeSpins: round.settlementResult.freeSpins.odds,
                 totalFreeSpins: this.freeSpinsConsumer.getTotalAvaiableFreeSpins(player),
-                tumbles: round.settlementResult.tumbles.map((tumble) => ({
-                    icons: tumble.icons,
+                tumbles: round.settlementResult.tumbles.map((tumble: TumbleRecord) => ({
+                    symbols: tumble.symbols,
                     win: tumble.win,
-                    result: tumble.newBoard,
-                    settlement: {
-                        explode: tumble.explodedSymbols,
-                        new: tumble.newSymbols,
-                    },
-                    multipliers: tumble.multipliers,
+                    reels: tumble.reels,
+                    reelMultipliers: tumble.reelMultipliers,
+                    triggeredStage: tumble.triggeredStage,
+                    triggeredPositions: tumble.triggeredPositions,
+                    newSymbols: tumble.newSymbols,
                 })),
                 multiplier: round.multiplier,
-                totalMultiplier: round.totalMultiplier,
                 isFreeSpin: round.freeSpin,
                 reachMaxWin: round.reachMaxWin,
                 actualBetwin: round.actualBetwin,
