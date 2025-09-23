@@ -1,6 +1,9 @@
 import { EventConsumers } from "sc-slot-game-base";
+import CascadingClusterGameData from "../game-data";
 
 export default class PromotionFreeSpinsConsumer extends EventConsumers.PromotionFreeSpinsConsumer {
+    declare gameData: CascadingClusterGameData;
+
     extendPromo(baseData, originalPromotion) {
         return {
             ...baseData,
@@ -10,8 +13,8 @@ export default class PromotionFreeSpinsConsumer extends EventConsumers.Promotion
     }
 
     getDefaultBetLevel() {
-        const { cascadingSlotsConfig } = this.gameData.gameConfigs;
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
-        return cascadingSlotsConfig.betLevels[0];
+        return cascadingClusterConfig.betLevels[0];
     }
 }

@@ -1,6 +1,11 @@
 import { EventConsumers } from "sc-slot-game-base";
+import CascadingClusterGameData from "../game-data";
 
 export default class InGameConsumer extends EventConsumers.InGameConsumer {
+    declare gameData: CascadingClusterGameData;
+
+    private readonly promotionApiClient: any;
+
     constructor({
         definition,
         gameData,
@@ -30,19 +35,19 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         this.promotionApiClient = gamePromotionApiClient.instance();
     }
 
-    async buildPayload(realPlayer) {
+    async buildPayload(realPlayer: any) {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === realPlayer.session.currencyGroupId);
         const coinValues = settings?.coinValues;
         const maxWinPerRound = settings?.maxWinPerRound;
         const defaultCoinValue = settings?.defaultCoinValue;
 
-        const { betLevels, betMultiplier, oddsByCounts, freeSpins: freeSpinsConfig } = this.gameData.gameConfigs.cascadingSlotsConfig;
+        const { betLevels, betMultiplier, odds, freeSpins: freeSpinsConfig } = this.gameData.gameConfigs.cascadingClusterConfig;
         const gameConfigs = {
             coinValues,
             maxWinPerRound,
             betLevels,
             betMultiplier,
-            odds: { symbols: oddsByCounts, freeSpins: freeSpinsConfig },
+            odds: { symbols: odds, freeSpins: freeSpinsConfig },
             defaultCoinValue,
         };
 
@@ -62,6 +67,8 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
                 rate,
                 multiplier: session.multiplier,
             },
+            promotion: undefined,
+            promotionTOProgress: undefined,
         };
 
         if (realPlayer.promotion && !realPlayer.promotionTOProgress) {
@@ -106,7 +113,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         };
     }
 
-    getAvailableFreeSpins(realPlayer) {
+    getAvailableFreeSpins(realPlayer: any) {
         const totalOfFreeSpins = this.freeSpinsConsumer.getTotalAvaiableFreeSpins(realPlayer);
         const soonestExpiredFreeSpin = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(realPlayer);
 

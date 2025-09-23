@@ -1,6 +1,8 @@
 import { Table } from "sc-game-base";
+import CascadingClusterGameData from "../game-data";
 
 export default class UserSignInConsumer extends Table.EventConsumers.TableUserSignInConsumer {
+    declare gameData: CascadingClusterGameData;
     extendPromo(baseData, originalPromotion) {
         return {
             ...baseData,
@@ -9,7 +11,7 @@ export default class UserSignInConsumer extends Table.EventConsumers.TableUserSi
         };
     }
     getDefaultBetLevel() {
-        const { cascadingSlotsConfig } = this.gameData.gameConfigs;
-        return cascadingSlotsConfig.betLevels[0];
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
+        return cascadingClusterConfig.betLevels[0];
     }
 }

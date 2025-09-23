@@ -54,6 +54,20 @@ export type GameConfigs = {
     type: number;
 };
 
+export type ExchangeRates = {
+    code: Record<string, number>;
+};
+
+export type RealPlayer = {
+    UID: string;
+    profile: { name: string; minBet: number; maxBet: number };
+    session: any;
+    socketClient: any;
+    promotion: any;
+};
+
 export default class CascadingClusterGameData extends SlotGameData {
     declare gameConfigs: GameConfigs;
+    declare exchangeRates: ExchangeRates;
+    declare realPlayers: Record<string, RealPlayer>;
 }

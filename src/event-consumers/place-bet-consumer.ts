@@ -1,12 +1,15 @@
 import { helpers } from "sc-common";
 import { EventConsumers } from "sc-slot-game-base";
+import CascadingClusterGameData from "../game-data";
 
 export default class PlaceBetConsumer extends EventConsumers.PlaceBetConsumer {
+    declare gameData: CascadingClusterGameData;
+
     createPromotionPayload(player, originalPayload, promotionBetAmount) {
-        const { cascadingSlotsConfig } = this.gameData.gameConfigs;
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         return {
-            betLevel: cascadingSlotsConfig.betLevels[0],
+            betLevel: cascadingClusterConfig.betLevels[0],
             coinValue: player.promotion.coinValue,
             promotionId: player.promotion.promotionId,
             usePromotion: true,
@@ -70,7 +73,7 @@ export default class PlaceBetConsumer extends EventConsumers.PlaceBetConsumer {
         return [
             {
                 failure: !configs.enabled,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, {}),
             },
         ];
     }
@@ -81,12 +84,12 @@ export default class PlaceBetConsumer extends EventConsumers.PlaceBetConsumer {
 
         return [
             {
-                failure: !payload.freeSpin && this.gameData.gameConfigs.cascadingSlotsConfig.betLevels.indexOf(betLevel) === -1,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+                failure: !payload.freeSpin && this.gameData.gameConfigs.cascadingClusterConfig.betLevels.indexOf(betLevel) === -1,
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, {}),
             },
             {
                 failure: !payload.freeSpin && settings.coinValues.indexOf(coinValue) === -1,
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, {}),
             },
         ];
     }

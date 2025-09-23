@@ -1,7 +1,16 @@
 import { round as mathRound } from "mathjs";
 import { Core } from "sc-game-base";
+import RoundCalculator from "../cluster-board/round-calculator";
+import CascadingClusterGameData from "../game-data";
+import FreeSpinsConsumer from "./free-spins-consumer";
+import TotalMultiplierConsumer from "./total-multiplier-consumer";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
+    declare gameData: CascadingClusterGameData;
+    declare roundCalculator: RoundCalculator;
+    declare freeSpinsConsumer: FreeSpinsConsumer;
+    declare totalMultiplierConsumer: TotalMultiplierConsumer;
+
     constructor({
         definition,
         gameData,
@@ -31,7 +40,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         this.roundCalculator = roundCalculator;
     }
 
-    async settleRound(player, roundId) {
+    async settleRound(player: any, roundId: number) {
         const round = await this.queryRound(roundId);
 
         if (round) {
@@ -108,14 +117,18 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     }
 
     calculateBetResult(round) {
-        const betResult = {};
-        const { bigWinRatio } = this.gameData.gameConfigs.cascadingSlotsConfig;
+        const { bigWinRatio } = this.gameData.gameConfigs.cascadingClusterConfig;
 
-        betResult.totalBetAmount = round.totalAmount;
-        betResult.totalWin = round.betwin;
-        betResult.netWin = round.betwin > 0 ? round.betwin - round.totalAmount : 0;
+        const betResult = {
+            totalBetAmount: round.totalAmount,
+            totalWin: round.betwin,
+            netWin: round.betwin > 0 ? round.betwin - round.totalAmount : 0,
+            totalLost: 0,
+            bigWin: false,
+        };
+
         betResult.totalLost = betResult.totalBetAmount > betResult.totalWin ? betResult.totalBetAmount - betResult.totalWin : 0;
-        betResult.bigWin = betResult.totalWin / bigWinRatio >= betResult.totalBetAmount;
+        betResult.bigWin = betResult.totalWin / bigWinRatio.big >= betResult.totalBetAmount;
 
         return betResult;
     }

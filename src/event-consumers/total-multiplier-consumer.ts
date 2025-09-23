@@ -1,4 +1,12 @@
+import mongoose from "mongoose";
+import CascadingClusterGameData from "../game-data";
+import FreeSpinsConsumer from "./free-spins-consumer";
+
 export default class TotalMultiplierConsumer {
+    declare gameData: CascadingClusterGameData;
+    declare totalMultiplierRepository: mongoose.Model<any>;
+    declare freeSpinsConsumer: FreeSpinsConsumer;
+
     /**
      * @param {SlotGameData} gameData
      * @param {mongoose.Model} totalMultiplierRepository
