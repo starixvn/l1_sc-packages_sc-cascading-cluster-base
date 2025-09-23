@@ -30,7 +30,6 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     async upsertBet(player, roundId, bet, rate, applicableInterceptors) {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
-        ///TODO: Review exchange rate and oddsByCounts
         let newBet: any = {
             id: roundId,
             uid: player.UID,
@@ -43,9 +42,9 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             betMultiplier: bet.betMultiplier,
             totalAmount: bet.totalAmount,
             rate: rate,
-            //exchangeRateId: this.gameData.exchangeRates.exId,
+            exchangeRateId: this.gameData.exchangeRates.exId,
             odds: {
-                //oddsByCounts: cascadingClusterConfig.oddsByCounts,
+                oddsByCounts: cascadingClusterConfig.odds,
                 freeSpins: cascadingClusterConfig.freeSpins,
             },
         };

@@ -152,6 +152,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     win: tumble.win,
                     reels: tumble.reels,
                     reelMultipliers: tumble.reelMultipliers,
+                    rageMeter: tumble.rageMeter,
                     triggeredStage: tumble.triggeredStage,
                     triggeredPositions: tumble.triggeredPositions,
                     newSymbols: tumble.newSymbols,

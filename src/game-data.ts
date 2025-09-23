@@ -56,6 +56,9 @@ export type GameConfigs = {
 };
 
 export type ExchangeRates = {
+    exId: number;
+    time: string;
+    source: string;
     code: Record<string, number>;
 };
 
