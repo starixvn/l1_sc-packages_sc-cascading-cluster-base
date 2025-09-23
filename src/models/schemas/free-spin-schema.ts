@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { FreeSpin } from "../interfaces";
 
-export default new mongoose.Schema({
+export default new mongoose.Schema<FreeSpin>({
     id: { type: Number, required: true },
     uid: { type: String, required: true },
     name: { type: String, required: true },

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import RoundTotalMultiplierSchema from "./round-total-multiplier-schema";
+import { TotalMultiplier } from "../interfaces";
 
-export default new mongoose.Schema({
+export default new mongoose.Schema<TotalMultiplier>({
     uid: { type: String },
     playerId: { type: String },
     name: { type: String, required: true },

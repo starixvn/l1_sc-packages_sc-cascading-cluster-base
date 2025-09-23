@@ -1,10 +1,17 @@
+import mongoose from "mongoose";
+import { Round } from "../models/interfaces";
+import { TotalMultiplier } from "../models/interfaces";
+
 export default class HistoryQuery {
-    constructor(roundsRepository, totalMultiplierRepository) {
+    declare roundsRepository: mongoose.Model<Round>;
+    declare totalMultiplierRepository: mongoose.Model<TotalMultiplier>;
+
+    constructor(roundsRepository: mongoose.Model<Round>, totalMultiplierRepository: mongoose.Model<TotalMultiplier>) {
         this.roundsRepository = roundsRepository;
         this.totalMultiplierRepository = totalMultiplierRepository;
     }
 
-    async queryHistory(player, page, pageSize) {
+    async queryHistory(player: { UID: string }, page: number, pageSize: number) {
         if (page < 1 || !player) {
             return {};
         }
@@ -41,7 +48,7 @@ export default class HistoryQuery {
         const betLogs = rawBetLogs.map((rawBetLog) => {
             const betLog = { ...rawBetLog };
             if (betLog.freeSpin) {
-                betLog.totalMultipliers = totalMultipliers.find((t) => t.rounds.some((r) => r.roundId === rawBetLog.id));
+                (betLog as any).totalMultipliers = totalMultipliers.find((t) => t.rounds.some((r) => r.roundId === rawBetLog.id));
             }
 
             return betLog;

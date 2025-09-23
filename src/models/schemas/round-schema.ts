@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { Round } from "../interfaces";
 
-export default new mongoose.Schema({
+export default new mongoose.Schema<Round>({
     id: { type: Number, required: true },
     name: { type: String, required: true },
     siteId: { type: String },

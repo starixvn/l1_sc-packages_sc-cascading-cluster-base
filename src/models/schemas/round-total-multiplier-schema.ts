@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { RoundTotalMultiplier } from "../interfaces";
 
-export default new mongoose.Schema(
+export default new mongoose.Schema<RoundTotalMultiplier>(
     {
         time: { type: Date },
         roundId: { type: Number },
