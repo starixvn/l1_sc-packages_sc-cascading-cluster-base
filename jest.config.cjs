@@ -1,6 +1,5 @@
 module.exports = async () => {
     return {
-        preset: "ts-jest",
         rootDir: "./",
         verbose: true,
         transformIgnorePatterns: [
@@ -9,5 +8,9 @@ module.exports = async () => {
         testEnvironment: "node",
         testResultsProcessor: "jest-sonar-reporter",
         setupFilesAfterEnv: ["jest-extended/all"],
+        transform: {
+            '^.+\\.(ts|tsx)$': ['ts-jest'],
+            '^.+\\.(js|jsx)$': ['@swc/jest']
+        }
     };
 };
