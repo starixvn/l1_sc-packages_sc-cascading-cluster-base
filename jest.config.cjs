@@ -9,7 +9,7 @@ module.exports = async () => {
         testResultsProcessor: "jest-sonar-reporter",
         setupFilesAfterEnv: ["jest-extended/all"],
         transform: {
-            '^.+\\.(ts|tsx)$': ['ts-jest'],
+            '^.+\\.(ts|tsx)$': ['@swc/jest'],
             '^.+\\.(js|jsx)$': ['@swc/jest']
         }
     };
