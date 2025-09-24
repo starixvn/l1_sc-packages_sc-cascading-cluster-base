@@ -1,7 +1,7 @@
 {
     "name": "sc-cascading-cluster-base",
     "version": "1.0.1-beta.5",
-    "main": "dist/index.d.ts",
+    "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
         "dist/**/*",
@@ -32,7 +32,7 @@
     "dependencies": {
         "mathjs": "14.5.3",
         "sc-slot-board-generator": "1.0.1",
-        "sc-slot-game-base": "^3.1.1-beta.2"
+        "sc-slot-game-base": "^3.1.1-beta.3"
     },
     "resolutions": {
         "mongoose": "6.13.8",
