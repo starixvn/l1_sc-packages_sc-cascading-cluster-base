@@ -164,7 +164,7 @@ export default class RoundCalculator {
         let result = 0;
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
-                if (reels[i][j].symbol === Config.SC) {
+                if (reels[i][j].symbol === Config.scatterSymbol) {
                     result++;
                 }
             }
@@ -238,12 +238,12 @@ export default class RoundCalculator {
 
         for (let j = 0; j < this.gridSize; j++) {
             result.gridMultipliers[col1][j]++;
-            if (result.reels[col1][j].symbol !== Config.SC) {
+            if (result.reels[col1][j].symbol !== Config.scatterSymbol) {
                 result.reels[col1][j].isDetonated = true;
                 detonatedPositions.push(new Coordinate(col1, j));
             }
             result.gridMultipliers[col2][j]++;
-            if (result.reels[col2][j].symbol !== Config.SC) {
+            if (result.reels[col2][j].symbol !== Config.scatterSymbol) {
                 result.reels[col2][j].isDetonated = true;
                 detonatedPositions.push(new Coordinate(col2, j));
             }
@@ -265,7 +265,7 @@ export default class RoundCalculator {
         for (let i = x; i < x + 3; i++) {
             for (let j = y; j < y + 3; j++) {
                 result.gridMultipliers[i][j]++;
-                if (result.reels[i][j].symbol !== Config.SC) {
+                if (result.reels[i][j].symbol !== Config.scatterSymbol) {
                     result.reels[i][j].isDetonated = true;
                     detonatedPositions.push(new Coordinate(i, j));
                 }
@@ -286,7 +286,7 @@ export default class RoundCalculator {
         for (let i = 0; i < 6; i++) {
             let x = this.chance.integer({ min: 0, max: this.gridSize - 1 });
             let y = this.chance.integer({ min: 0, max: this.gridSize - 1 });
-            while (result.reels[x][y].symbol === Config.SC) {
+            while (result.reels[x][y].symbol === Config.scatterSymbol) {
                 x = this.chance.integer({ min: 0, max: this.gridSize - 1 });
                 y = this.chance.integer({ min: 0, max: this.gridSize - 1 });
             }
@@ -328,7 +328,7 @@ export default class RoundCalculator {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = result.reels[i][j].symbol;
-                if (!result.reels[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.SC) {
+                if (!result.reels[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.scatterSymbol) {
                     const prize = new Prize();
                     prize.symbol = symbol;
                     prize.position.push(new Coordinate(i, j));
@@ -371,15 +371,15 @@ export default class RoundCalculator {
     }
 
     private calcPayout(prizeList: Prize[]): number {
+        const { cascadingClusterConfig } = this.gameData.gameConfigs;
+        const { odds } = cascadingClusterConfig;
         let result = 0.0;
         for (let i = 0; i < prizeList.length; i++) {
-            if (prizeList[i].link >= 15) {
-                prizeList[i].odds = Config.payout[prizeList[i].symbol][15];
-                prizeList[i].winScore = Config.payout[prizeList[i].symbol][15] * prizeList[i].multiplier;
-            } else {
-                prizeList[i].odds = Config.payout[prizeList[i].symbol][prizeList[i].link];
-                prizeList[i].winScore = Config.payout[prizeList[i].symbol][prizeList[i].link] * prizeList[i].multiplier;
-            }
+            const symbolOdds = odds[prizeList[i].symbol].find((x) => prizeList[i].link >= x.from && prizeList[i].link <= x.to);
+
+            prizeList[i].odds = symbolOdds?.odds ?? 0;
+            prizeList[i].winScore = prizeList[i].odds * prizeList[i].multiplier;
+
             result += prizeList[i].winScore;
         }
         return result;

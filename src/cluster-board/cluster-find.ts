@@ -16,7 +16,7 @@ export class ClusterFindBFS {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.SC) {
+                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.scatterSymbol) {
                     const prize = new Prize();
                     prize.symbol = symbol;
                     prize.position.push(new Coordinate(i, j));
@@ -73,7 +73,7 @@ export class ClusterFindBFSOptimized {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.SC) {
+                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.scatterSymbol) {
                     const clusterSize = this.countClusterSize(i, j, symbol);
                     if (clusterSize >= Config.minLinkRequirement) {
                         const prize = new Prize();
@@ -136,7 +136,7 @@ export class ClusterFindBFSIterative {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.SC) {
+                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.scatterSymbol) {
                     const clusterSize = this.countClusterSize(i, j, symbol);
                     if (clusterSize >= Config.minLinkRequirement) {
                         const prize = new Prize();
@@ -201,7 +201,7 @@ export class ClusterFindUltraFast {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.SC) {
+                if (!this.grid[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.scatterSymbol) {
                     const clusterSize = this.countClusterSize(i, j, symbol);
                     if (clusterSize >= Config.minLinkRequirement) {
                         const prize = new Prize();
@@ -279,7 +279,7 @@ export class ClusterFindHK {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (symbol === 0 || symbol === Config.space || symbol === Config.SC) {
+                if (symbol === 0 || symbol === Config.space || symbol === Config.scatterSymbol) {
                     continue;
                 }
 
@@ -342,7 +342,7 @@ export class ClusterFindHK {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (symbol === 0 || symbol === Config.space || symbol === Config.SC) {
+                if (symbol === 0 || symbol === Config.space || symbol === Config.scatterSymbol) {
                     continue;
                 }
 
@@ -359,7 +359,7 @@ export class ClusterFindHK {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = this.grid[i][j].symbol;
-                if (symbol === 0 || symbol === Config.space || symbol === Config.SC) {
+                if (symbol === 0 || symbol === Config.space || symbol === Config.scatterSymbol) {
                     continue;
                 }
 
