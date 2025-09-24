@@ -1,6 +1,6 @@
 {
     "name": "sc-cascading-cluster-base",
-    "version": "1.0.1-beta.3",
+    "version": "1.0.1-beta.4",
     "main": "dist/index.d.ts",
     "types": "dist/index.d.ts",
     "files": [
