@@ -14,7 +14,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     declare freeSpinsConsumer: FreeSpinsConsumer;
     declare totalMultiplierConsumer: TotalMultiplierConsumer;
     declare definition: SlotGameDefinition;
-    declare roundsRepository: mongoose.Model<Round, {}, {}, {}, any>;
+    declare roundsRepository: mongoose.Model<Round>;
     declare jackpotsPublisher: EventPublishers.JackpotPublisher;
 
     constructor({
@@ -117,8 +117,8 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
     }
 
-    queryRound(roundId) {
-        return this.roundsRepository.findOne({ id: roundId, paid: false }).exec();
+    async queryRound(roundId) {
+        return await this.roundsRepository.findOne({ id: roundId, paid: false }).exec();
     }
 
     calculateBetResult(round): any {
