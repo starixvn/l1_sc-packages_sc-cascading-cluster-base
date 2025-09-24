@@ -10,7 +10,7 @@
     ],
     "type": "module",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest",
         "test-coverage": "jest --collect-coverage",
         "reg": "npm set registry http://npm.lumigame.com",
         "pub": "npm publish --registry http://npm.lumigame.com",

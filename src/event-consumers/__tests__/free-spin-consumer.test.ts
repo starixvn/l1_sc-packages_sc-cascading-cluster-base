@@ -2,7 +2,8 @@ import Chance from "chance";
 import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
-import { EventConsumers, SlotGameData } from "sc-slot-game-base";
+import { EventConsumers } from "sc-slot-game-base";
+import CascadingClusterGameData from "../../game-data";
 import { FreeSpinsConsumer } from "../index";
 
 describe("freeSpinsConsumer", () => {
@@ -16,6 +17,8 @@ describe("freeSpinsConsumer", () => {
     const idCountersConsumer = stub(EventConsumers.IdCountersConsumer);
 
     const player = {
+        UID: chance.string(),
+        session: { playerId: chance.string() },
         profile: { name: chance.name_suffix() },
     };
 
@@ -50,7 +53,7 @@ describe("freeSpinsConsumer", () => {
             await consumer.gainFreeSpin(player, freeSpinData, timeToLive);
 
             // Assert
-            expect(idCountersConsumer.consume).toBeCalledWith("freespin");
+            expect(idCountersConsumer.consume).toHaveBeenCalledWith("freespin");
         });
 
         it("should call freeSpinsRepository.create", async () => {
@@ -62,10 +65,10 @@ describe("freeSpinsConsumer", () => {
             await consumer.gainFreeSpin(player, freeSpinData, timeToLive);
 
             // Assert
-            expect(freeSpinsRepository.create).toBeCalledWith({
+            expect(freeSpinsRepository.create).toHaveBeenCalledWith({
                 uid: player.UID,
                 name: player.profile.name,
-                playerId: player.session?.memberId,
+                playerId: player.session?.playerId,
                 id: gameData.freeSpinId,
                 roundId: freeSpinData.roundId,
                 bet: freeSpinData.totalAmount,
@@ -75,7 +78,7 @@ describe("freeSpinsConsumer", () => {
                 expiryTime: new Date(mockDate.getTime()).setSeconds(mockDate.getSeconds() + timeToLive),
                 betLevel: freeSpinData.betLevel,
                 coinValue: freeSpinData.coinValue,
-                betMultiplier: gameData.gameConfigs.cascadingSlotsConfig.betMultiplier,
+                betMultiplier: gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
             });
         });
 
@@ -101,7 +104,7 @@ describe("freeSpinsConsumer", () => {
                     expiryTime: new Date(mockDate.getTime()).setSeconds(mockDate.getSeconds() + timeToLive),
                     betLevel: freeSpinData.betLevel,
                     coinValue: freeSpinData.coinValue,
-                    betMultiplier: gameData.gameConfigs.cascadingSlotsConfig.betMultiplier,
+                    betMultiplier: gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
                 },
             ]);
         });
@@ -109,17 +112,17 @@ describe("freeSpinsConsumer", () => {
 });
 
 function stubGameData() {
-    const gameData = new SlotGameData();
+    const gameData = new CascadingClusterGameData(0);
 
     gameData.remainingTime = 20;
     gameData.gameConfigs = {
         enabled: true,
         minbet: 1,
         maxbet: 1000,
-        cascadingSlotsConfig: {
+        cascadingClusterConfig: {
             betMultiplier: 20,
         },
-    };
+    } as any;
     gameData.freeSpinId = 1;
 
     return gameData;
