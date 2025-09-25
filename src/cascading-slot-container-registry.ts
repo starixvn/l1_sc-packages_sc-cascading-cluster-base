@@ -1,9 +1,8 @@
 import { asClass, asValue } from "awilix";
 import { SlotContainerRegistry } from "sc-slot-game-base";
-import CascadingBoardGenerator from "./board/cascading-board-generator";
 import defaultDefinition from "./board/default-definition";
-import RoundCalculator from "./board/round-calculator";
-import TumbleCalculator from "./board/tumble-calculator";
+import BoardGenerator from "./cluster-board/board-generator";
+import RoundCalculator from "./cluster-board/round-calculator";
 import { CascadingBot, CascadingGameCron, CascadingProcessBetQueue } from "./crons";
 import {
     FreeSpinsConsumer,
@@ -32,9 +31,8 @@ export default class CascadingSlotContainerRegistry extends SlotContainerRegistr
         });
 
         this.container.register({
-            tumbleCalculator: asClass(TumbleCalculator),
             roundCalculator: asClass(RoundCalculator).proxy(),
-            boardGenerator: asClass(CascadingBoardGenerator).singleton(),
+            boardGenerator: asClass(BoardGenerator).singleton().proxy(),
         });
     }
 

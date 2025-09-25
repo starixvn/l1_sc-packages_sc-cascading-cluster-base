@@ -44,7 +44,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             rate: rate,
             exchangeRateId: this.gameData.exchangeRates.exId,
             odds: {
-                oddsByCounts: cascadingClusterConfig.odds,
+                symbols: cascadingClusterConfig.odds,
                 freeSpins: cascadingClusterConfig.freeSpins,
             },
         };

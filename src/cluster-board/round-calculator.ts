@@ -38,7 +38,7 @@ export default class RoundCalculator {
     private readonly gameData: CascadingClusterGameData;
     private readonly chance: Chance.Chance;
 
-    constructor(gameData: CascadingClusterGameData, generator: BoardGenerator) {
+    constructor({ gameData, generator }: { gameData: CascadingClusterGameData; generator: BoardGenerator }) {
         this.stat = new Statistician();
         this.generator = generator;
         this.gameData = gameData;
@@ -279,7 +279,7 @@ export default class RoundCalculator {
         const detonatedPositions: Coordinate[] = [];
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
-                if (result.reels[i][j].symbol >= 5 && result.reels[i][j].symbol <= 8) {
+                if (result.reels[i][j].symbol >= 4 && result.reels[i][j].symbol <= 7) {
                     result.reels[i][j].isDetonated = true;
                     result.gridMultipliers[i][j]++;
                     detonatedPositions.push(new Coordinate(i, j));
