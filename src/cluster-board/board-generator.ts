@@ -4,6 +4,7 @@ import Grid from "./grid";
 import NgReels from "./ng-reels";
 import NgResult from "./ng-result";
 import Result, { ResultCategory } from "./result";
+import FgResult from "./fg-result";
 export default class BoardGenerator {
     private readonly gridSize: number = 6;
     private readonly chance: Chance.Chance;
@@ -19,6 +20,14 @@ export default class BoardGenerator {
         ngResult.gridMultipliers = this.initializeGridMultiplier();
 
         return ngResult;
+    }
+
+    public generateFreeSpinBoard(fgResult: FgResult): Result {
+        fgResult.reelSetIndex = this.chance.weighted(FgReels.reelsIndex, FgReels.weight);
+        this.genGrid(FgReels.reels[fgResult.reelSetIndex], fgResult);
+        fgResult.gridMultipliers = this.initializeGridMultiplier();
+
+        return fgResult;
     }
 
     public detonateAndCascadeBoard(result: Result): number[][] {

@@ -107,6 +107,72 @@ export default class RoundCalculator {
         return result;
     }
 
+    public processSpinning2(round: Round, maxWinPerRound: number, result: Result): Result {
+        const baseBet = round.coinValue * round.betLevel;
+        const newResult = this.generator.generateFreeSpinBoard(result);
+        newResult.tumbles.push(
+            this.recordTumble({
+                result: newResult,
+                prizeList: [],
+                baseBet,
+                win: 0,
+                newSymbols: [],
+            })
+        );
+        let prizeList: Prize[] = [];
+        this.calcPrize(newResult, prizeList);
+
+        while (prizeList.length > 0 && newResult.winScore < maxWinPerRound) {
+            const win = this.calcPayout(prizeList) * baseBet;
+            newResult.winScore += win;
+            newResult.rageCounter += this.calcRageMeter(prizeList);
+            this.updateFeatureTrigger(newResult);
+            this.markDetonated(newResult, prizeList);
+            const newSymbols = this.generator.detonateAndCascadeBoard(newResult);
+
+            newResult.tumbles.push(
+                this.recordTumble({
+                    result: newResult,
+                    prizeList,
+                    baseBet,
+                    win,
+                    newSymbols,
+                })
+            );
+
+            this.renewGrid(newResult.reels);
+            prizeList.length = 0;
+            this.calcPrize(newResult, prizeList);
+
+            while (prizeList.length === 0 && !newResult.isQueueEmpty()) {
+                // Process Rage Meter
+                const { feature, triggeredPositions } = this.processRageMeter(newResult);
+
+                newResult.tumbles.push(
+                    this.recordTumble({
+                        result: newResult,
+                        prizeList,
+                        baseBet,
+                        win: 0,
+                        triggeredStage: feature,
+                        triggeredPositions,
+                    })
+                );
+
+                this.renewGrid(newResult.reels);
+                this.calcPrize(newResult, prizeList);
+            }
+        }
+        if (newResult.rageCounter >= 80) {
+            newResult.rageCounter = 0;
+            newResult.featureTriggered = [false, false, false, false];
+        }
+        this.updateFreeSpins(newResult);
+        this.updateRound(round, newResult, maxWinPerRound);
+
+        return newResult;
+    }
+
     updateFreeSpins(result: Result): void {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
