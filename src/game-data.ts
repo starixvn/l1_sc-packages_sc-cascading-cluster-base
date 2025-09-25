@@ -5,11 +5,7 @@ export type GameConfigs = {
     bot_maxbet: number;
     botenabled: boolean;
     cascadingClusterConfig: {
-        bigWinRatio: {
-            big: number;
-            mega: number;
-            super: number;
-        };
+        bigWinRatio: number[];
         tileMultiplier: {
             step: number;
             max: number;
@@ -29,13 +25,6 @@ export type GameConfigs = {
                 count: number;
                 odds: number;
             }[];
-        };
-        features: {
-            buyFreeSpins: {
-                enabled: boolean;
-                multiplier: number;
-                siteExclusions: string[];
-            };
         };
     };
     delayStartTime: number;

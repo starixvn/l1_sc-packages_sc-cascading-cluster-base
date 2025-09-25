@@ -133,7 +133,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         };
 
         betResult.totalLost = betResult.totalBetAmount > betResult.totalWin ? betResult.totalBetAmount - betResult.totalWin : 0;
-        betResult.bigWin = betResult.totalWin / bigWinRatio.big >= betResult.totalBetAmount;
+        betResult.bigWin = betResult.totalWin / bigWinRatio[0] >= betResult.totalBetAmount;
 
         return betResult;
     }

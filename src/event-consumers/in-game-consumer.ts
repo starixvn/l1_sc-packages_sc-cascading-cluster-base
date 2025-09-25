@@ -41,7 +41,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         const maxWinPerRound = settings?.maxWinPerRound;
         const defaultCoinValue = settings?.defaultCoinValue;
 
-        const { betLevels, betMultiplier, odds, freeSpins: freeSpinsConfig, features, bigWinRatio, rageMeters } = this.gameData.gameConfigs.cascadingClusterConfig;
+        const { betLevels, betMultiplier, odds, freeSpins: freeSpinsConfig, bigWinRatio, rageMeters } = this.gameData.gameConfigs.cascadingClusterConfig;
         const gameConfigs = {
             coinValues,
             maxWinPerRound,
@@ -61,7 +61,6 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         const rate = exchangeRates.code[session.currencyCode] * session.multiplier;
 
         const payload = {
-            features,
             gameConfigs,
             freeSpins,
             totalMultiplier: this.gameData.ingame[realPlayer.profile.name]?.totalMultiplier ?? 0,
