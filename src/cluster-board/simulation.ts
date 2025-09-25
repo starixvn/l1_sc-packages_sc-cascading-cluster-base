@@ -503,7 +503,7 @@ function simulate(totalRounds: number) {
             },
         },
     };
-    const roundCalculator = new RoundCalculator(gameData as any, generator);
+    const roundCalculator = new RoundCalculator(gameData as any);
     let winScore = 0;
     const maxWin = 200_000;
     for (let i = 0; i < totalRounds; i++) {
