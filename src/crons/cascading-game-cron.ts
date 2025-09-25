@@ -96,7 +96,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         await this.getSettingForNewRound();
         await this.updateExchangeRates();
         await this.promotionFreeSpinsConsumer.loadPromotionsRunning();
-        this.boardGenerator.initialize();
+        // this.boardGenerator.initialize();
         this.initTrialMode();
 
         const job = new cron.CronJob(
