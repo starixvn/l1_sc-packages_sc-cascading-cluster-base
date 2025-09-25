@@ -22,14 +22,21 @@ export default class BoardGenerator {
         return ngResult;
     }
 
-    public generateFreeSpinBoard(fgResult: FgResult): Result {
+    public generateFreeSpinBoard(fgResult: Result, resetMultiplier: boolean = true): Result {
         fgResult.reelSetIndex = this.chance.weighted(FgReels.reelsIndex, FgReels.weight);
         this.genGrid(FgReels.reels[fgResult.reelSetIndex], fgResult);
-        fgResult.gridMultipliers = this.initializeGridMultiplier();
+        fgResult.gridMultipliers = resetMultiplier ? this.initializeGridMultiplier() : fgResult.gridMultipliers;
 
         return fgResult;
     }
 
+    public generateBaseGameBoard(ngResult: Result): Result {
+        ngResult.reelSetIndex = this.chance.weighted(NgReels.reelsIndex, NgReels.weight);
+        this.genGrid(NgReels.reels[ngResult.reelSetIndex], ngResult);
+        ngResult.gridMultipliers = this.initializeGridMultiplier();
+
+        return ngResult;
+    }
     public detonateAndCascadeBoard(result: Result): number[][] {
         const newSymbols: number[][] = Array.from({ length: this.gridSize }, () => []);
         // 1. Detonate
@@ -62,7 +69,7 @@ export default class BoardGenerator {
         return newSymbols;
     }
 
-    private initializeGridMultiplier(): number[][] {
+    public initializeGridMultiplier(): number[][] {
         return [
             [-1, -1, -1, -1, -1, -1],
             [-1, -1, -1, -1, -1, -1],
@@ -74,6 +81,7 @@ export default class BoardGenerator {
     }
 
     private genGrid(reelSet: number[][], result: Result): void {
+        result.reels = [];
         for (let i = 0; i < this.gridSize; i++) {
             result.stopIndex[i] = this.chance.integer({ min: 0, max: reelSet[i].length - 1 });
             result.reels.push([]);

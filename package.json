@@ -17,7 +17,7 @@
         "betaver": "npm version prerelease --preid beta",
         "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
         "semantic-release": "semantic-release",
-        "simulation": "tsx src/cluster-board/simulation.ts",
+        "simulation": "tsx src/simulation/original-odds.ts",
         "prepare-husky": "husky",
         "build": "tsc",
         "prepublishOnly": "npm run build"
