@@ -34,20 +34,20 @@ export default class RoundCalculator {
     private readonly maxPayout: number = 10000;
     private stat: Statistician;
     private currScNumber: number;
-    private readonly generator: BoardGenerator;
+    private readonly boardGenerator: BoardGenerator;
     private readonly gameData: CascadingClusterGameData;
     private readonly chance: Chance.Chance;
 
-    constructor({ gameData, generator }: { gameData: CascadingClusterGameData; generator: BoardGenerator }) {
+    constructor({ gameData, boardGenerator }: { gameData: CascadingClusterGameData; boardGenerator: BoardGenerator }) {
         this.stat = new Statistician();
-        this.generator = generator;
+        this.boardGenerator = boardGenerator;
         this.gameData = gameData;
         this.chance = new Chance();
     }
 
     public processSpinning(round: Round, maxWinPerRound: number): Result {
         const baseBet = round.coinValue * round.betLevel;
-        const result = this.generator.generateNormalGameBoard();
+        const result = this.boardGenerator.generateNormalGameBoard();
         result.tumbles.push(
             this.recordTumble({
                 result,
@@ -66,7 +66,7 @@ export default class RoundCalculator {
             result.rageCounter += this.calcRageMeter(prizeList);
             this.updateFeatureTrigger(result);
             this.markDetonated(result, prizeList);
-            const newSymbols = this.generator.detonateAndCascadeBoard(result);
+            const newSymbols = this.boardGenerator.detonateAndCascadeBoard(result);
 
             result.tumbles.push(
                 this.recordTumble({
@@ -109,7 +109,7 @@ export default class RoundCalculator {
 
     public processSpinning2(round: Round, maxWinPerRound: number, result: Result): Result {
         const baseBet = round.coinValue * round.betLevel;
-        const newResult = this.generator.generateFreeSpinBoard(result);
+        const newResult = this.boardGenerator.generateFreeSpinBoard(result);
         newResult.tumbles.push(
             this.recordTumble({
                 result: newResult,
@@ -128,7 +128,7 @@ export default class RoundCalculator {
             newResult.rageCounter += this.calcRageMeter(prizeList);
             this.updateFeatureTrigger(newResult);
             this.markDetonated(newResult, prizeList);
-            const newSymbols = this.generator.detonateAndCascadeBoard(newResult);
+            const newSymbols = this.boardGenerator.detonateAndCascadeBoard(newResult);
 
             newResult.tumbles.push(
                 this.recordTumble({
@@ -286,7 +286,7 @@ export default class RoundCalculator {
                 }
             }
         }
-        this.generator.detonateAndCascadeBoard(result);
+        this.boardGenerator.detonateAndCascadeBoard(result);
         return detonatedPositions;
     }
 
@@ -314,7 +314,7 @@ export default class RoundCalculator {
                 detonatedPositions.push(new Coordinate(col2, j));
             }
         }
-        this.generator.detonateAndCascadeBoard(result);
+        this.boardGenerator.detonateAndCascadeBoard(result);
         return detonatedPositions;
     }
 
@@ -337,7 +337,7 @@ export default class RoundCalculator {
                 }
             }
         }
-        this.generator.detonateAndCascadeBoard(result);
+        this.boardGenerator.detonateAndCascadeBoard(result);
         return detonatedPositions;
     }
 
@@ -360,7 +360,7 @@ export default class RoundCalculator {
             result.gridMultipliers[x][y]++;
             detonatedPositions.push(new Coordinate(x, y));
         }
-        this.generator.detonateAndCascadeBoard(result);
+        this.boardGenerator.detonateAndCascadeBoard(result);
         return detonatedPositions;
     }
 
