@@ -1,5 +1,6 @@
 import { asClass, asValue } from "awilix";
 import { SlotContainerRegistry } from "sc-slot-game-base";
+import { TumbleCalculator } from "./board";
 import defaultDefinition from "./board/default-definition";
 import BoardGenerator from "./cluster-board/board-generator";
 import RoundCalculator from "./cluster-board/round-calculator";
@@ -31,6 +32,7 @@ export default class CascadingSlotContainerRegistry extends SlotContainerRegistr
         });
 
         this.container.register({
+            tumbleCalculator: asClass(TumbleCalculator),
             roundCalculator: asClass(RoundCalculator).proxy(),
             boardGenerator: asClass(BoardGenerator).singleton().proxy(),
         });
