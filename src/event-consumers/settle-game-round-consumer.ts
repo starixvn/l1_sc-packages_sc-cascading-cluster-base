@@ -142,7 +142,6 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         return {
             finish: {
                 roundId: round.id,
-                result: round.result,
                 win: round.betWin,
                 bigWin: betResult.bigWin,
                 freeSpins: round.settlementResult.freeSpins.odds,
@@ -157,7 +156,6 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     triggeredPositions: tumble.triggeredPositions,
                     newSymbols: tumble.newSymbols,
                 })),
-                multiplier: round.multiplier,
                 isFreeSpin: round.freeSpin,
                 reachMaxWin: round.reachMaxWin,
                 actualBetwin: round.actualBetwin,
