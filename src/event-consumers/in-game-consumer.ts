@@ -53,6 +53,8 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             rageMeters,
         };
 
+        //todo: get is features enabled from database
+        const features = this.getFeatures(true);
         const freeSpins = this.getAvailableFreeSpins(realPlayer);
 
         const user = await this.getUserInfo(realPlayer);
@@ -61,6 +63,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         const rate = exchangeRates.code[session.currencyCode] * session.multiplier;
 
         const payload = {
+            features,
             gameConfigs,
             freeSpins,
             totalMultiplier: this.gameData.ingame[realPlayer.profile.name]?.totalMultiplier ?? 0,
@@ -135,5 +138,18 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             multiplier,
             rageMeterPoint
         };
+    }
+
+    getFeatures(isEnabled: boolean): any {
+        return {
+            buyFreeSpins: {
+                enabled: isEnabled,
+                multiplier: 50
+            },
+            buySuperFreeSpins: {
+                enabled: isEnabled,
+                multiplier: 500
+            }
+        }
     }
 }
