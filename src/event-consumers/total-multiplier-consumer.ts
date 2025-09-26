@@ -4,87 +4,73 @@ import FreeSpinsConsumer from "./free-spins-consumer";
 
 export default class TotalMultiplierConsumer {
     declare gameData: CascadingClusterGameData;
-    declare totalMultiplierRepository: mongoose.Model<any>;
+    declare freeSpinStateRepository: mongoose.Model<any>;
     declare freeSpinsConsumer: FreeSpinsConsumer;
 
-    /**
-     * @param {SlotGameData} gameData
-     * @param {mongoose.Model} totalMultiplierRepository
-     * @param {EventConsumers.FreeSpinsConsumer} dependencies.freeSpinsConsumer
-     */
-    constructor(gameData, totalMultiplierRepository, freeSpinsConsumer) {
+    constructor(gameData, freeSpinStateRepository, freeSpinsConsumer) {
         this.gameData = gameData;
-        this.totalMultiplierRepository = totalMultiplierRepository;
+        this.freeSpinStateRepository = freeSpinStateRepository;
         this.freeSpinsConsumer = freeSpinsConsumer;
     }
 
-    async increaseTotalMultiplier(player, { roundId, multiplier }) {
-        const memberName = player.profile.name;
-        const currentTotalMultiplier = this.gameData.ingame[memberName].totalMultiplier ?? 0;
-        const newTotalMultiplier = currentTotalMultiplier + multiplier;
-
+    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, reachedStages, rageMeter }) {
         const newRoundRecord = {
             time: new Date(),
             roundId,
-            prevTotalMultiplier: currentTotalMultiplier,
-            totalMultiplier: newTotalMultiplier,
-            multiplier,
+            reelMultipliers,
+            stageQueue,
+            reachedStages,
+            rageMeter,
         };
 
-        if (currentTotalMultiplier) {
-            await this.totalMultiplierRepository.updateOne(
-                { uid: player.UID, ended: false },
-                {
-                    $push: {
-                        rounds: newRoundRecord,
-                    },
-                }
-            );
-        } else {
-            await this.totalMultiplierRepository.create({
-                uid: player.UID,
-                playerId: player.session?.playerId,
-                name: player.profile.name,
-                ended: false,
-                time: new Date(),
-                rounds: [newRoundRecord],
-                ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
-            });
-        }
+        await this.freeSpinStateRepository.updateOne(
+            { uid: player.UID, ended: false },
+            {
+                $push: {
+                    rounds: newRoundRecord,
+                },
+                $setOnInsert: {
+                    uid: player.UID,
+                    playerId: player.session?.playerId,
+                    name: player.profile.name,
+                    ended: false,
+                    time: new Date(),
+                    rounds: [newRoundRecord],
+                    ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
+                },
+            },
+            { upsert: true, setDefaultsOnInsert: true }
+        );
 
-        this.gameData.ingame[memberName].totalMultiplier = newTotalMultiplier;
+        this.gameData.ingame[player.profile.name].freeSpinState = newRoundRecord;
     }
 
     getCurrentMultiplier(player) {
-        return this.gameData.ingame[player.profile.name].totalMultiplier ?? 0;
+        return this.gameData.ingame[player.profile.name].freeSpinState;
     }
 
     async stopChain(player) {
-        await this.totalMultiplierRepository.updateOne({ uid: player.UID, ended: false }, { ended: true, endTime: new Date() });
+        await this.freeSpinStateRepository.updateOne({ uid: player.UID, ended: false }, { ended: true, endTime: new Date() });
 
-        this.gameData.ingame[player.profile.name].totalMultiplier = 0;
+        this.gameData.ingame[player.profile.name].freeSpinState = null;
     }
 
     async reload() {
-        const totalMultipliers = await this.totalMultiplierRepository.find({ ended: false }).lean().exec();
+        const freeSpinStates = await this.freeSpinStateRepository.find({ ended: false }).lean().exec();
 
-        if (totalMultipliers.length > 0) {
-            const players = Object.values(this.gameData.realPlayers);
-
-            totalMultipliers.forEach(async (totalMultiplier) => {
-                var player = players.find((player) => player.UID === totalMultiplier.uid);
-
-                const latestTotalMultiplier = totalMultiplier.rounds[totalMultiplier.rounds.length - 1].totalMultiplier;
+        if (freeSpinStates.length > 0) {
+            freeSpinStates.forEach(async (state) => {
+                const latestState = state.rounds[state.rounds.length - 1];
                 const isHavingFreeSpins =
-                    this.freeSpinsConsumer.hasFreeSpin({ profile: { name: totalMultiplier.name } }) ||
-                    (totalMultiplier.promotionId && player?.promotion?.remainingBonusItems > 0);
+                    this.freeSpinsConsumer.hasFreeSpin({ profile: { name: state.name } }) ||
+                    (state.promotionId && this.gameData.ingame[state.name]?.promotion?.remainingBonusItems > 0);
 
                 if (isHavingFreeSpins) {
-                    this.gameData.ingame[totalMultiplier.name] = this.gameData.ingame[totalMultiplier.name] ?? { betQueue: [] };
-                    this.gameData.ingame[totalMultiplier.name].totalMultiplier = latestTotalMultiplier;
+                    this.gameData.ingame[state.name] = this.gameData.ingame[state.name] ?? { betQueue: [] };
+                    this.gameData.ingame[state.name].freeSpinState = latestState;
                 } else {
-                    this.gameData.ingame[totalMultiplier.name] && (this.gameData.ingame[totalMultiplier.name].totalMultiplier = 0);
-                    await this.totalMultiplierRepository.updateOne({ uid: totalMultiplier.uid, ended: false }, { ended: true, endTime: new Date() });
+                    this.gameData.ingame[state.name] && (this.gameData.ingame[state.name].freeSpinState = null);
+                    await this.freeSpinStateRepository.updateOne({ uid: state.uid, ended: false }, { ended: true, endTime: new Date() });
                 }
             });
         }

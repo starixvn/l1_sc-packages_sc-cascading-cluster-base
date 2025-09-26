@@ -1,12 +1,12 @@
-import { RoundTotalMultiplier } from "./round-total-multiplier-interface";
+import { FreeRoundState } from "./round-total-multiplier-interface";
 
-export interface TotalMultiplier {
+export interface FreeSpinState {
     uid: string;
     playerId: string;
     name: string;
     ended: boolean;
     time: Date;
     endTime: Date;
-    rounds: RoundTotalMultiplier[];
+    rounds: FreeRoundState[];
     promotionId: string;
 }

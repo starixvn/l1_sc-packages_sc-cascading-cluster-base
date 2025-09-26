@@ -1,7 +1,8 @@
-export interface RoundTotalMultiplier {
+export interface FreeRoundState {
     time: Date;
     roundId: number;
-    prevTotalMultiplier: number;
-    totalMultiplier: number;
-    multiplier: number;
+    reelMultipliers: number[][];
+    stageQueue: number[];
+    reachedStages: boolean[];
+    rageMeter: number;
 }

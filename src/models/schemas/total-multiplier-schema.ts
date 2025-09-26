@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
+import { FreeSpinState } from "../interfaces";
 import RoundTotalMultiplierSchema from "./round-total-multiplier-schema";
-import { TotalMultiplier } from "../interfaces";
 
-export default new mongoose.Schema<TotalMultiplier>({
+export default new mongoose.Schema<FreeSpinState>({
     uid: { type: String },
     playerId: { type: String },
     name: { type: String, required: true },

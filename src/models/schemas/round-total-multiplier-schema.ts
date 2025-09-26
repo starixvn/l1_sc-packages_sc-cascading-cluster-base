@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
-import { RoundTotalMultiplier } from "../interfaces";
+import { FreeRoundState } from "../interfaces";
 
-export default new mongoose.Schema<RoundTotalMultiplier>(
+export default new mongoose.Schema<FreeRoundState>(
     {
         time: { type: Date },
         roundId: { type: Number },
-        prevTotalMultiplier: { type: Number, default: 0 },
-        totalMultiplier: { type: Number, default: 0 },
-        multiplier: { type: Number, default: 0 },
+        reelMultipliers: { type: [[Number]] },
+        stageQueue: { type: [Number], default: [] },
+        reachedStages: { type: [Boolean] },
+        rageMeter: { type: Number, default: 0 },
     },
     { _id: false }
 );
