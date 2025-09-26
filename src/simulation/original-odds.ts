@@ -503,6 +503,9 @@ function simulate(totalRounds: number) {
     };
     const roundCalculator = new RoundCalculator({ gameData: gameData as any, boardGenerator: generator });
     let winScore = 0;
+    let ngWinScore = 0;
+    let fgWinScore = 0;
+    const fgTriggerFreq = [0, 0, 0, 0];
     const maxWin = 10_000;
     const timeStart = Date.now();
     for (let i = 0; i < totalRounds; i++) {
@@ -512,17 +515,19 @@ function simulate(totalRounds: number) {
         } as any;
         const result = new NgResult();
         roundCalculator.processSpinning2(round as any, maxWin, result);
-        const winBase = result.winScore;
+        ngWinScore += Math.min(result.winScore, maxWin);
+        for (let i = 0; i < 4; i++) {
+            if (result.featureTriggered[i]) {
+                fgTriggerFreq[i]++;
+            }
+        }
         let freeSpins = result.freeSpins.odds;
         let winFg = 0;
         const fgResult = new FgResult();
         fgResult.gridMultipliers = generator.initializeGridMultiplier();
         while (freeSpins > 0) {
-            if (fgResult.freeSpins.odds > 0) {
-                const g = 4;
-            }
             roundCalculator.processSpinning2(round as any, maxWin, fgResult, false);
-            if (fgResult.category === "Fg" && fgResult.rageCounter >= 80) {
+            if (fgResult.rageCounter >= 80) {
                 fgResult.rageCounter = 0;
                 fgResult.featureTriggered = [false, false, false, false];
             }
@@ -533,13 +538,17 @@ function simulate(totalRounds: number) {
             freeSpins += fgResult.freeSpins.odds;
             freeSpins--;
         }
-        winScore += Math.min(winBase, maxWin) + Math.min(winFg, maxWin);
+        fgWinScore += winFg;
+        winScore += Math.min(result.winScore, maxWin) + Math.min(winFg, maxWin);
     }
     const allBetAmount = totalRounds;
     const rtp = winScore / allBetAmount;
     const timeEnd = Date.now();
     console.log(`Time: ${timeEnd - timeStart}ms`);
     console.log(`RTP: ${rtp}`);
+    console.log(`NG Win Score: ${ngWinScore / totalRounds}`);
+    console.log(`FG Win Score: ${fgWinScore / totalRounds}`);
+    console.log(`FG Trigger Frequency: ${fgTriggerFreq.map((freq) => freq / totalRounds)}`);
 }
 
 simulate(1_000_000);

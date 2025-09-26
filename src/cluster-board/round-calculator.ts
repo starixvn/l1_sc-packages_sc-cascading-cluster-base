@@ -394,7 +394,7 @@ export default class RoundCalculator {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 const symbol = result.reels[i][j].symbol;
-                if (!result.reels[i][j].used && symbol !== 0 && symbol !== Config.space && symbol !== Config.scatterSymbol) {
+                if (!result.reels[i][j].used && symbol !== Config.space && symbol !== Config.scatterSymbol) {
                     const prize = new Prize();
                     prize.symbol = symbol;
                     prize.position.push(new Coordinate(i, j));
