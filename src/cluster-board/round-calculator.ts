@@ -204,7 +204,7 @@ export default class RoundCalculator {
             reels: result.reels.map((row) => row.map((grid) => grid.symbol)),
             reelMultipliers: result.gridMultipliers.map((row) =>
                 row.map((multi) =>
-                    multi > 0 ? Math.max(multi * cascadingClusterConfig.tileMultiplier.step, cascadingClusterConfig.tileMultiplier.max) : multi
+                    multi > 0 ? Math.min(multi * cascadingClusterConfig.tileMultiplier.step, cascadingClusterConfig.tileMultiplier.max) : multi
                 )
             ),
             symbols: prizeList.map((prize) => ({
