@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 import { Round } from "../models/interfaces";
-import { TotalMultiplier } from "../models/interfaces";
 
 export default class HistoryQuery {
     declare roundsRepository: mongoose.Model<Round>;
-    declare totalMultiplierRepository: mongoose.Model<TotalMultiplier>;
+    declare totalMultiplierRepository: mongoose.Model<any>;
 
-    constructor(roundsRepository: mongoose.Model<Round>, totalMultiplierRepository: mongoose.Model<TotalMultiplier>) {
+    constructor(roundsRepository: mongoose.Model<Round>, totalMultiplierRepository: mongoose.Model<any>) {
         this.roundsRepository = roundsRepository;
         this.totalMultiplierRepository = totalMultiplierRepository;
     }
