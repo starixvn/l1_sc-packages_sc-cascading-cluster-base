@@ -24,7 +24,7 @@ describe("PlaceBetConsumer", () => {
         const defaultGameData = new Core.GameData();
         defaultGameData.remainingTime = 20;
         defaultGameData.gameConfigs = GameConfig();
-        defaultGameData.gameConfigs.cascadingSlotsConfig = { betLevels: [] };
+        defaultGameData.gameConfigs.cascadingClusterConfig = { betLevels: [] };
         defaultGameData.currencyGroupGames = [
             {
                 groupId: "1",
@@ -302,7 +302,7 @@ describe("PlaceBetConsumer", () => {
                     // Arrange
                     const expectedValue = { failure: false, notice: { errorCode: helpers.noticeHelper.invalidBet } };
                     player.session.currencyGroupId = "3";
-                    gameData.gameConfigs.cascadingSlotsConfig.betLevels = [];
+                    gameData.gameConfigs.cascadingClusterConfig.betLevels = [];
                     payload.betLevel = 2;
                     payload.freeSpin = true;
 
@@ -319,7 +319,7 @@ describe("PlaceBetConsumer", () => {
                     // Arrange
                     const expectedValue = { failure: false, notice: { errorCode: helpers.noticeHelper.invalidBet } };
                     player.session.currencyGroupId = "1";
-                    gameData.gameConfigs.cascadingSlotsConfig.betLevels = [1, 5, 10];
+                    gameData.gameConfigs.cascadingClusterConfig.betLevels = [1, 5, 10];
                     payload.betLevel = 5;
                     payload.freeSpin = true;
 
@@ -370,7 +370,7 @@ describe("PlaceBetConsumer", () => {
                 it("should return result with failure", () => {
                     // Arrange
                     const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.invalidBet } };
-                    gameData.gameConfigs.cascadingSlotsConfig.betLevels = [];
+                    gameData.gameConfigs.cascadingClusterConfig.betLevels = [];
                     player.session.currencyGroupId = "3";
                     payload.betLevel = 2;
 
@@ -386,7 +386,7 @@ describe("PlaceBetConsumer", () => {
                 it("should return result with not failure", () => {
                     // Arrange
                     const expectedValue = { failure: false, notice: { errorCode: helpers.noticeHelper.invalidBet } };
-                    gameData.gameConfigs.cascadingSlotsConfig.betLevels = [1, 5, 10];
+                    gameData.gameConfigs.cascadingClusterConfig.betLevels = [1, 5, 10];
                     player.session.currencyGroupId = "1";
                     payload.betLevel = 5;
 
@@ -402,7 +402,7 @@ describe("PlaceBetConsumer", () => {
                 it("should return result with failure", () => {
                     // Arrange
                     const expectedValue = { failure: true, notice: { errorCode: helpers.noticeHelper.invalidBet } };
-                    gameData.gameConfigs.cascadingSlotsConfig.betLevels = [1, 5, 10];
+                    gameData.gameConfigs.cascadingClusterConfig.betLevels = [1, 5, 10];
                     payload.coinValue = 2;
 
                     // Act
@@ -417,7 +417,7 @@ describe("PlaceBetConsumer", () => {
                 it("should return result with not failure", () => {
                     // Arrange
                     const expectedValue = { failure: false, notice: { errorCode: helpers.noticeHelper.invalidBet } };
-                    gameData.gameConfigs.cascadingSlotsConfig.betLevels = [1, 5, 10];
+                    gameData.gameConfigs.cascadingClusterConfig.betLevels = [1, 5, 10];
                     payload.coinValue = 10;
 
                     // Act

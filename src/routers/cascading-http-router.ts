@@ -19,7 +19,7 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
 
     init(app) {
         super.init(app);
-
+        
         app.post(
             "/api/set-result",
             utils.authentication.useAuthenticate({
@@ -42,19 +42,13 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
 
                 this.logService.logWarning(`receives a result cheating call for ${params?.name} with the board as ${params.result}.`);
 
-                const preGeneratedResult = this.generateResultFromAdmin(params.result);
-                this.gameData.settlementResultFromAdmin[params.name] = preGeneratedResult;
+                this.gameData.settlementResultFromAdmin[params.name] = params.result;
 
                 res.send(
-                    preGeneratedResult.map((x) => ({
-                        icons: Object.entries(x.icons).map(([key, value]) => ({
-                            index: parseInt(key),
-                            ...value,
-                        })),
-                        multipliers: x.multipliers,
-                        board: x.newBoard,
-                        freeSpinCount: x.newBoard.filter((symbol) => symbol === defaultDefinition.specialSymbols.freeSpins).length,
-                    }))
+                    {
+                        success: true,
+                        result: params.result,
+                    }
                 );
             } else {
                 res.send({ noPermission: true });
@@ -63,33 +57,5 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
             this.logService.logError(error);
             res.send({ error: true });
         }
-    }
-
-    generateResultFromAdmin(result) {
-        const { cascadingClusterConfig } = this.gameData.gameConfigs;
-        const { base, tumbles } = result;
-        const firstTumble = {
-            newBoard: base.board,
-            multipliers: base.multipliers,
-            icons: this.tumbleCalculator.calculateIconOdds(base.board, cascadingClusterConfig),
-        };
-
-        const preGeneratedResult = [firstTumble];
-
-        for (const tumble of tumbles) {
-            const lastTumble = preGeneratedResult[preGeneratedResult.length - 1];
-            this.boardGenerator.setRefillSymbols(tumble.newSymbols, tumble.multipliers);
-
-            const refilledResult = this.boardGenerator.explodeAndRefill(
-                lastTumble.newBoard,
-                Object.keys(lastTumble.icons).map((x) => parseInt(x)),
-                lastTumble.multipliers
-            );
-
-            (refilledResult as any).icons = this.tumbleCalculator.calculateIconOdds(refilledResult.newBoard, cascadingClusterConfig);
-            preGeneratedResult.push(refilledResult as any);
-        }
-
-        return preGeneratedResult;
     }
 }

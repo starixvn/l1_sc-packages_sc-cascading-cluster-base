@@ -73,21 +73,40 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
     async processSpinning(player, round: Round) {
         const currencyGroupSettings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
-        //const currentTotalMultiplier = this.totalMultiplierConsumer.getCurrentMultiplier(player);
         const maxWinPerRound = mathRound(currencyGroupSettings.maxWinPerRound * round.totalAmount, 2);
+        const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
+        if(resultFromAdmin) {
+            this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
+            delete this.gameData.settlementResultFromAdmin[player.profile.name];
+            return;
+        }
 
         this.roundCalculator.processSpinning(
             round,
             maxWinPerRound
-            //this.gameData.settlementResultFromAdmin[player.profile.name]
         );
 
-        if (round.freeSpin && round.betWin > 0) {
-            // await this.totalMultiplierConsumer.increaseTotalMultiplier(player, { roundId: round.id, multiplier: round.multiplier });
-        }
-
-        delete this.gameData.settlementResultFromAdmin[player.profile.name];
     }
+
+    calculateBetResultFromAdmin(round: any, maxWinPerRound: number, resultFromAdmin: any) {
+        let totalWin = 0;
+        const baseBet = round.betLevel * round.coinValue;
+        const { tumbles, freeSpins } = resultFromAdmin;
+        
+        for(const tumble of tumbles) {
+            if(tumble.symbols) {
+                const winEachTumble = tumble.symbols.reduce((sum, symbol) => {
+                        return sum + (symbol.odds * symbol.multiplier);
+                    }, 0);
+                totalWin += winEachTumble * baseBet;
+            }
+        }
+        round.settlementResult = {tumbles, freeSpins};
+        round.betWin = Math.min(totalWin, maxWinPerRound);
+        round.reachMaxWin = totalWin >= maxWinPerRound;
+        round.actualBetwin = totalWin;
+    }
+
 
     async processFreeSpins(player, round) {
         const { id, settlementResult } = round;
