@@ -91,7 +91,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     calculateBetResultFromAdmin(round: any, maxWinPerRound: number, resultFromAdmin: any) {
         let totalWin = 0;
         const baseBet = round.betLevel * round.coinValue;
-        const { tumbles, freeSpins } = resultFromAdmin;
+        const { tumbles } = resultFromAdmin;
         
         for(const tumble of tumbles) {
             if(tumble.symbols) {
@@ -101,7 +101,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 totalWin += winEachTumble * baseBet;
             }
         }
-        round.settlementResult = {tumbles, freeSpins};
+        round.settlementResult = {tumbles, freeSpins: resultFromAdmin.freeSpins ?? { count: 0, odds: 0 }};
         round.betWin = Math.min(totalWin, maxWinPerRound);
         round.reachMaxWin = totalWin >= maxWinPerRound;
         round.actualBetwin = totalWin;

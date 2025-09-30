@@ -60,7 +60,7 @@ export default class TotalMultiplierConsumer {
 
         if (freeSpinStates.length > 0) {
             freeSpinStates.forEach(async (state) => {
-                const latestState = state.rounds[state.rounds.length - 1];
+                const latestState = state.rounds?.[state.rounds?.length - 1];
                 const isHavingFreeSpins =
                     this.freeSpinsConsumer.hasFreeSpin({ profile: { name: state.name } }) ||
                     (state.promotionId && this.gameData.ingame[state.name]?.promotion?.remainingBonusItems > 0);
