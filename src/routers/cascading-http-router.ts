@@ -19,7 +19,7 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
 
     init(app) {
         super.init(app);
-        
+
         app.post(
             "/api/set-result",
             utils.authentication.useAuthenticate({
@@ -28,6 +28,9 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
             }),
             (_req, res) => this.handleSetBoard(_req.body, res)
         );
+
+        //For testing
+        app.post("/api/set-result-test", (_req, res) => this.handleSetBoard(_req.body, res));
     }
 
     handleSetBoard(params, res) {
@@ -44,12 +47,10 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
 
                 this.gameData.settlementResultFromAdmin[params.name] = params.result;
 
-                res.send(
-                    {
-                        success: true,
-                        result: params.result,
-                    }
-                );
+                res.send({
+                    success: true,
+                    result: params.result,
+                });
             } else {
                 res.send({ noPermission: true });
             }
