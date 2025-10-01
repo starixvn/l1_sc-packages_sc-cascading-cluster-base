@@ -7,6 +7,7 @@ import CascadingClusterGameData from "../game-data";
 import { Round } from "../models/interfaces";
 import FreeSpinsConsumer from "./free-spins-consumer";
 import TotalMultiplierConsumer from "./total-multiplier-consumer";
+import Config from "../cluster-board/config";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
     declare gameData: CascadingClusterGameData;
@@ -92,7 +93,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         let totalWin = 0;
         const baseBet = round.betLevel * round.coinValue;
         const { tumbles } = resultFromAdmin;
-        const { odds } = this.gameData.gameConfigs.cascadingClusterConfig;
+        const { odds, freeSpins } = this.gameData.gameConfigs.cascadingClusterConfig;
         
         for(const tumble of tumbles) {
             if(tumble.symbols) {
@@ -103,13 +104,27 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 totalWin += winEachTumble * baseBet;
             }
         }
-        round.settlementResult = {tumbles, freeSpins: resultFromAdmin.freeSpins ?? { count: 0, odds: 0 }};
+        const lastTumble = tumbles[tumbles.length - 1];
+        const freeSpinCount = this.countOccurrences(lastTumble.reels, Config.scatterSymbol);
+        const freeSpinOdds = freeSpins.initialOdds.filter((x) => freeSpinCount >= x.count).map((x) => x.odds);
+        const freeSpinsResult = { count: freeSpinCount, odds: Math.max(0, ...freeSpinOdds) };
+        round.settlementResult = {tumbles, freeSpins: freeSpinsResult};
         round.betWin = Math.min(totalWin, maxWinPerRound);
         round.reachMaxWin = totalWin >= maxWinPerRound;
         round.actualBetwin = totalWin;
     }
 
-
+    countOccurrences(arr, target) {
+        let count = 0;
+        for (const row of arr) {
+            for (const cell of row) {
+                if (cell === target) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
     async processFreeSpins(player, round) {
         const { id, settlementResult } = round;
         if (settlementResult.freeSpins?.odds > 0) {
@@ -158,7 +173,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
         return betResult;
     }
-
+    
     collectRoundResult(player, round, betResult): any {
         return {
             finish: {

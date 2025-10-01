@@ -1,20 +1,12 @@
 import { utils } from "sc-common";
 import { Core } from "sc-game-base";
-import defaultDefinition from "../board/default-definition";
-import { TumbleCalculator } from "../board";
-import { CascadingBoardGenerator } from "../board";
 import CascadingClusterGameData from "../game-data";
 
 export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
-    declare tumbleCalculator: TumbleCalculator;
-    declare boardGenerator: CascadingBoardGenerator;
     declare gameData: CascadingClusterGameData;
 
-    constructor(appConfigs, gameData, tumbleCalculator, boardGenerator, logService, historyQuery, metricQuery) {
+    constructor(appConfigs, gameData, logService, historyQuery, metricQuery) {
         super(appConfigs, gameData, historyQuery, metricQuery, logService);
-
-        this.tumbleCalculator = tumbleCalculator;
-        this.boardGenerator = boardGenerator;
     }
 
     init(app) {
