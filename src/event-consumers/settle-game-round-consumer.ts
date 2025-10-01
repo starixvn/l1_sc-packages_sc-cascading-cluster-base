@@ -92,11 +92,13 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         let totalWin = 0;
         const baseBet = round.betLevel * round.coinValue;
         const { tumbles } = resultFromAdmin;
+        const { odds } = this.gameData.gameConfigs.cascadingClusterConfig;
         
         for(const tumble of tumbles) {
             if(tumble.symbols) {
                 const winEachTumble = tumble.symbols.reduce((sum, symbol) => {
-                        return sum + (symbol.odds * symbol.multiplier);
+                        const oddGameConfig = odds[symbol.symbol].find((x) => symbol.count >= x.from && symbol.count <= x.to);
+                        return sum + (oddGameConfig.odds * symbol.multiplier);
                     }, 0);
                 totalWin += winEachTumble * baseBet;
             }
