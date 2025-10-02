@@ -30,7 +30,7 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
             if (this.appConfigs.sentry.env !== "PROD") {
                 if (!params?.name || !params?.result) {
                     this.logService.logError("receives a result cheating call with invalid params.");
-                    res.json({ error: true });
+                    res.send({ error: true });
                     return;
                 }
 
@@ -38,15 +38,15 @@ export default class CascadingHttpRouter extends Core.Routers.HttpRouter {
 
                 this.gameData.settlementResultFromAdmin[params.name] = params.result;
 
-                res.json({
+                res.send({
                     success: true
                 });
             } else {
-                res.json({ noPermission: true });
+                res.send({ noPermission: true });
             }
         } catch (error) {
             this.logService.logError(error);
-            res.json({ error: true });
+            res.send({ error: true });
         }
     }
 }
