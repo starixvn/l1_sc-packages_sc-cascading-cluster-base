@@ -99,11 +99,12 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             if(tumble.symbols) {
                 const winEachTumble = tumble.symbols.reduce((sum, symbol) => {
                         const oddGameConfig = odds[symbol.symbolType].find((x) => symbol.count >= x.from && symbol.count <= x.to)?.odds ?? 0;
-                        tumble.odds = oddGameConfig;
-                        tumble.win = oddGameConfig * symbol.multiplier * baseBet;
+                        symbol.odds = oddGameConfig;
+                        symbol.win = oddGameConfig * symbol.multiplier * baseBet;
                         return sum + (oddGameConfig * symbol.multiplier);
                     }, 0);
-                totalWin += winEachTumble * baseBet;
+                tumble.win = winEachTumble * baseBet;
+                totalWin += tumble.win;
             }
         }
         const lastTumble = tumbles[tumbles.length - 1];
