@@ -107,12 +107,9 @@ export default class RoundCalculator {
         return result;
     }
 
-    public processSpinning2(round: Round, maxWinPerRound: number, result: Result, resetMultiplier: boolean = true): Result {
+    public processSpinning2(round: Round, maxWinPerRound: number, result: Result, generateBoard: (result: Result) => Result): Result {
         const baseBet = round.coinValue * round.betLevel;
-        const newResult =
-            result.category === "Fg"
-                ? this.boardGenerator.generateFreeSpinBoard(result, resetMultiplier)
-                : this.boardGenerator.generateBaseGameBoard(result);
+        const newResult = generateBoard(result);
         newResult.tumbles.push(
             this.recordTumble({
                 result: newResult,
@@ -148,7 +145,6 @@ export default class RoundCalculator {
             this.calcPrize(newResult, prizeList);
 
             while (prizeList.length === 0 && !newResult.isQueueEmpty()) {
-                // Process Rage Meter
                 const { feature, triggeredPositions } = this.processRageMeter(newResult);
 
                 newResult.tumbles.push(
