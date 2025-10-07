@@ -341,19 +341,29 @@ export default class RoundCalculator {
         } else if (result.category === "Fg") {
             this.stat.fgRageMeterFreq[0]++;
         }
-        // randomly remove 6 symbols (excl. SC)
-        const detonatedPositions: Coordinate[] = [];
-        for (let i = 0; i < 6; i++) {
-            let x = this.chance.integer({ min: 0, max: this.gridSize - 1 });
-            let y = this.chance.integer({ min: 0, max: this.gridSize - 1 });
-            while (result.reels[x][y].symbol === Config.scatterSymbol) {
-                x = this.chance.integer({ min: 0, max: this.gridSize - 1 });
-                y = this.chance.integer({ min: 0, max: this.gridSize - 1 });
+
+        const validPositions: Coordinate[] = [];
+        for (let i = 0; i < this.gridSize; i++) {
+            for (let j = 0; j < this.gridSize; j++) {
+                if (result.reels[i][j].symbol !== Config.scatterSymbol && !result.reels[i][j].isDetonated) {
+                    validPositions.push(new Coordinate(i, j));
+                }
             }
-            result.reels[x][y].isDetonated = true;
-            result.gridMultipliers[x][y]++;
-            detonatedPositions.push(new Coordinate(x, y));
         }
+
+        if (validPositions.length < 6) {
+            throw new Error("Valid positions are less than 6");
+        }
+
+        const detonatedPositions: Coordinate[] = [];
+        const positionsToSelect = this.chance.pickset(validPositions, 6);
+
+        for (const pos of positionsToSelect) {
+            result.reels[pos.x][pos.y].isDetonated = true;
+            result.gridMultipliers[pos.x][pos.y]++;
+            detonatedPositions.push(pos);
+        }
+
         this.boardGenerator.detonateAndCascadeBoard(result);
         return detonatedPositions;
     }
