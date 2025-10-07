@@ -74,19 +74,17 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
     async processSpinning(player, round: Round) {
         const currencyGroupSettings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
+        // if freespin round, get accumulateWin from ingame (in DB will get from accumulateWin from freespincollection) to compare with maxWin config
         const maxWinPerRound = mathRound(currencyGroupSettings.maxWinPerRound * round.totalAmount, 2);
         const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
-        if(resultFromAdmin) {
+        if (resultFromAdmin) {
             this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
             delete this.gameData.settlementResultFromAdmin[player.profile.name];
             return;
         }
 
-        this.roundCalculator.processSpinning(
-            round,
-            maxWinPerRound
-        );
-
+        this.roundCalculator.processSpinning(round, maxWinPerRound);
+        //check reach max round and update freespin collection, freespin in ingame data
     }
 
     calculateBetResultFromAdmin(round: any, maxWinPerRound: number, resultFromAdmin: any) {
@@ -94,15 +92,15 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         const baseBet = round.betLevel * round.coinValue;
         const { tumbles } = resultFromAdmin;
         const { odds, freeSpins } = this.gameData.gameConfigs.cascadingClusterConfig;
-        
-        for(const tumble of tumbles) {
-            if(tumble.symbols) {
+
+        for (const tumble of tumbles) {
+            if (tumble.symbols) {
                 const winEachTumble = tumble.symbols.reduce((sum, symbol) => {
-                        const oddGameConfig = odds[symbol.symbolType].find((x) => symbol.count >= x.from && symbol.count <= x.to)?.odds ?? 0;
-                        symbol.odds = oddGameConfig;
-                        symbol.win = oddGameConfig * symbol.multiplier * baseBet;
-                        return sum + (oddGameConfig * symbol.multiplier);
-                    }, 0);
+                    const oddGameConfig = odds[symbol.symbolType].find((x) => symbol.count >= x.from && symbol.count <= x.to)?.odds ?? 0;
+                    symbol.odds = oddGameConfig;
+                    symbol.win = oddGameConfig * symbol.multiplier * baseBet;
+                    return sum + oddGameConfig * symbol.multiplier;
+                }, 0);
                 tumble.win = winEachTumble * baseBet;
                 totalWin += tumble.win;
             }
@@ -111,7 +109,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         const freeSpinCount = this.countOccurrences(lastTumble.reels, Config.scatterSymbol);
         const freeSpinOdds = freeSpins.initialOdds.filter((x) => freeSpinCount >= x.count).map((x) => x.odds);
         const freeSpinsResult = { count: freeSpinCount, odds: Math.max(0, ...freeSpinOdds) };
-        round.settlementResult = {tumbles, freeSpins: freeSpinsResult};
+        round.settlementResult = { tumbles, freeSpins: freeSpinsResult };
         round.betWin = Math.min(totalWin, maxWinPerRound);
         round.reachMaxWin = totalWin >= maxWinPerRound;
         round.actualBetwin = totalWin;
@@ -131,6 +129,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     async processFreeSpins(player, round) {
         const { id, settlementResult } = round;
         if (settlementResult.freeSpins?.odds > 0) {
+            //should init accumulateWin and rageMeter
             await this.freeSpinsConsumer.gainFreeSpin(
                 player,
                 {
@@ -140,6 +139,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     betLevel: round.betLevel,
                     betMultiplier: round.betMultiplier,
                     numberOfFreeSpins: settlementResult.freeSpins.odds,
+                    //accumulateWin and rageMeter
                 },
                 this.definition.freeSpinLiveSeconds
             );

@@ -22,6 +22,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
             betLevel,
             coinValue,
             betMultiplier: this.gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
+            //accumulateWin and rageMeter
             expiryTime: player.usePromotion ? player.promotion.endDate : expiryTime,
             ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
         };
@@ -38,7 +39,8 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         if (newlyCreatedFreeSpin) {
             newlyCachedFreeSpin.id = newlyCreatedFreeSpin.id;
             this.gameData.ingame[memberName].freeSpins = this.gameData.ingame[memberName].freeSpins ?? [];
-
+            //this.gameData.ingame[memberName].freeSpinsRageMeter = 0;
+            //this.gameData.ingame[memberName].freeSpinsAccumulateWin = win from base game;
             this.gameData.ingame[memberName].freeSpins.push(newlyCachedFreeSpin);
             this.updatePlayerPromotionFreeSpins(player, newlyCreatedFreeSpin);
         }

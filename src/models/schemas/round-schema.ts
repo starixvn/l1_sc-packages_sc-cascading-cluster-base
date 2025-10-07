@@ -13,6 +13,7 @@ export default new mongoose.Schema<Round>({
     betMultiplier: { type: Number, default: 0 },
     totalAmount: { type: Number, default: 0 },
     freeSpin: { type: Boolean, default: false },
+    //Should add freespinId to keep freespin if it create from freespin
     reachMaxWin: { type: Boolean, default: false },
 
     settlementResult: { type: Object },
