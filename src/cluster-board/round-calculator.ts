@@ -274,13 +274,12 @@ export default class RoundCalculator {
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 if (result.reels[i][j].symbol >= 4 && result.reels[i][j].symbol <= 7) {
-                    result.reels[i][j].isDetonated = true;
-                    result.gridMultipliers[i][j]++;
+                    result.reels[i][j].symbol = this.chance.weighted(Config.phase4replaceSymbol, Config.phase4replaceSymbolWeight);
                     detonatedPositions.push(new Coordinate(i, j));
                 }
             }
         }
-        this.boardGenerator.detonateAndCascadeBoard(result);
+
         return detonatedPositions;
     }
 

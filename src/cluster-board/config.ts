@@ -6,6 +6,9 @@ class Config {
 
     // space is 8, Scatter is 9
     public static readonly minLinkRequirement: number = 5;
+
+    public static readonly phase4replaceSymbol = [0, 1, 2, 3];
+    public static readonly phase4replaceSymbolWeight = [10, 12, 14, 15];
 }
 
 export default Config;
