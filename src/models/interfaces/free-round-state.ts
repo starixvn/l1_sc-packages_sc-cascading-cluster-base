@@ -5,4 +5,5 @@ export interface FreeRoundState {
     stageQueue: number[];
     currentStage: number;
     rageMeter: number;
+    remainingWin: number;
 }

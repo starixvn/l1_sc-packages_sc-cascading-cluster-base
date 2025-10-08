@@ -14,7 +14,7 @@ export default class FreeSpinStateConsumer {
         this.freeSpinsConsumer = freeSpinsConsumer;
     }
 
-    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, currentStage, rageMeter }) {
+    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, currentStage, rageMeter, remainingWin }) {
         const newRoundRecord: FreeRoundState = {
             time: new Date(),
             roundId,
@@ -22,6 +22,7 @@ export default class FreeSpinStateConsumer {
             stageQueue,
             currentStage,
             rageMeter,
+            remainingWin,
         };
 
         await this.freeSpinStateRepository.updateOne(

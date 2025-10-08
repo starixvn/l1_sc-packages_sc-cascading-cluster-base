@@ -73,9 +73,8 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     }
 
     async processSpinning(player, round: Round) {
-        const currencyGroupSettings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
         // if freespin round, get accumulateWin from ingame (in DB will get from accumulateWin from freespincollection) to compare with maxWin config
-        const maxWinPerRound = mathRound(currencyGroupSettings.maxWinPerRound * round.totalAmount, 2);
+        const maxWinPerRound = this.getMaxWin(player, round.freeSpin);
         const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
         if (resultFromAdmin) {
             this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
@@ -83,8 +82,31 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             return;
         }
 
-        this.roundCalculator.processSpinning(round, maxWinPerRound);
+        const spinResult = this.roundCalculator.processSpinning(round, maxWinPerRound);
+
+        if (round.freeSpin) {
+            const remainingWin = maxWinPerRound - round.betWin;
+            await this.freeSpinStateConsumer.updateFreeSpinState(player, {
+                roundId: round.id,
+                remainingWin,
+                currentStage: spinResult.currentStage,
+                reelMultipliers: spinResult.gridMultipliers,
+                stageQueue: spinResult.featureQueue,
+                rageMeter: spinResult.rageCounter,
+            });
+        }
         //check reach max round and update freespin collection, freespin in ingame data
+    }
+
+    getMaxWin(player, isFreeSpin: boolean) {
+        const { maxWinPerRound } = this.gameData.gameConfigs;
+
+        if (isFreeSpin) {
+            const currentState = this.freeSpinStateConsumer.getCurrentState(player);
+            return currentState?.remainingWin ?? maxWinPerRound;
+        }
+
+        return mathRound(maxWinPerRound * player.session.totalAmount, 2);
     }
 
     calculateBetResultFromAdmin(round: any, maxWinPerRound: number, resultFromAdmin: any) {

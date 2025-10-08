@@ -9,6 +9,7 @@ export default new mongoose.Schema<FreeRoundState>(
         stageQueue: { type: [Number], default: [] },
         currentStage: { type: Number, default: 0 },
         rageMeter: { type: Number, default: 0 },
+        remainingWin: { type: Number, default: 0 },
     },
     { _id: false }
 );
