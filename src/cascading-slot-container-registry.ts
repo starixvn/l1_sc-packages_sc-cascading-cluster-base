@@ -6,12 +6,12 @@ import BoardGenerator from "./cluster-board/board-generator";
 import RoundCalculator from "./cluster-board/round-calculator";
 import { CascadingBot, CascadingGameCron, CascadingProcessBetQueue } from "./crons";
 import {
+    FreeSpinStateConsumer,
     FreeSpinsConsumer,
     InGameConsumer,
     PlaceBetConsumer,
     PromotionFreeSpinsConsumer,
     SettleGameRoundConsumer,
-    TotalMultiplierConsumer,
     UserSignInConsumer,
 } from "./event-consumers";
 import { CascadingSlotPromotionInterceptor } from "./event-interceptors";
@@ -52,7 +52,7 @@ export default class CascadingSlotContainerRegistry extends SlotContainerRegistr
         this.container.register({
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
-            totalMultiplierConsumer: asClass(TotalMultiplierConsumer).singleton(),
+            freeSpinStateConsumer: asClass(FreeSpinStateConsumer).singleton(),
             freeSpinsConsumer: asClass(FreeSpinsConsumer).singleton(),
             inGameConsumer: asClass(InGameConsumer).singleton().proxy(),
             userSignInConsumer: asClass(UserSignInConsumer).singleton().proxy(),

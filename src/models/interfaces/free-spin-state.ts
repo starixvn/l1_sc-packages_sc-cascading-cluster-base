@@ -1,4 +1,4 @@
-import { FreeRoundState } from "./round-total-multiplier-interface";
+import { FreeRoundState } from "./free-round-state";
 
 export interface FreeSpinState {
     uid: string;

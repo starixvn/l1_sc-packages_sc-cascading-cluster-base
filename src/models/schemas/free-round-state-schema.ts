@@ -7,7 +7,7 @@ export default new mongoose.Schema<FreeRoundState>(
         roundId: { type: Number },
         reelMultipliers: { type: [[Number]] },
         stageQueue: { type: [Number], default: [] },
-        reachedStages: { type: [Boolean] },
+        currentStage: { type: Number, default: 0 },
         rageMeter: { type: Number, default: 0 },
     },
     { _id: false }

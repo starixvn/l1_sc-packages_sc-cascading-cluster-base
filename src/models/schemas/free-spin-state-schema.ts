@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { FreeSpinState } from "../interfaces";
-import RoundTotalMultiplierSchema from "./round-total-multiplier-schema";
+import FreeRoundStateSchema from "./free-round-state-schema";
 
 export default new mongoose.Schema<FreeSpinState>({
     uid: { type: String },
@@ -9,6 +9,6 @@ export default new mongoose.Schema<FreeSpinState>({
     ended: { type: Boolean, default: false },
     time: { type: Date },
     endTime: { type: Date },
-    rounds: { type: [RoundTotalMultiplierSchema] },
+    rounds: { type: [FreeRoundStateSchema] },
     promotionId: { type: String },
 });

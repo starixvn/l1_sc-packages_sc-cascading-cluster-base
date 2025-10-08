@@ -9,8 +9,10 @@ class Result {
     // Fg Keep the info until the Fg end
     public category: ResultCategory;
     public rageCounter: number;
+    public currentStage: number;
+
     public gridMultipliers: number[][];
-    public featureTriggered: boolean[];
+    public featureTriggered: Record<number, boolean>;
 
     public featureQueue: number[];
 
@@ -27,7 +29,12 @@ class Result {
         this.category = category;
         this.rageCounter = 0;
         this.gridMultipliers = [];
-        this.featureTriggered = [false, false, false, false];
+        this.featureTriggered = {
+            1: false,
+            2: false,
+            3: false,
+            4: false,
+        };
 
         this.featureQueue = [];
 
@@ -37,6 +44,7 @@ class Result {
         this.winScore = 0;
         this.tumbles = [];
         this.freeSpins = { count: 0, odds: 0 };
+        this.currentStage = 0;
     }
 
     // Queue operations

@@ -9,7 +9,7 @@ import TumbleCalculator from "../../board/tumble-calculator";
 import { definition, gameConfigs } from "../../test-data";
 import FreeSpinsConsumer from "../free-spins-consumer";
 import SettleGameRoundConsumer from "../settle-game-round-consumer";
-import TotalMultiplierConsumer from "../total-multiplier-consumer";
+import freeSpinStateConsumer from "../total-multiplier-consumer";
 
 const currencyGroupSetting = {
     groupId: "g1",
@@ -29,7 +29,7 @@ const boardGenerator = {
 
 const freeSpinsConsumer = stub(FreeSpinsConsumer);
 
-const totalMultiplierConsumer = stub(TotalMultiplierConsumer);
+const freeSpinStateConsumer = stub(freeSpinStateConsumer);
 
 const tumbleCalculator = new TumbleCalculator();
 const endGame = jest.fn(() => ({ isOk: true }));
@@ -62,7 +62,7 @@ function initConsumer() {
         roundsRepository,
         userBetResultPublisher,
         freeSpinsConsumer,
-        totalMultiplierConsumer,
+        freeSpinStateConsumer,
         endGame,
         roundCalculator,
         gameManagementApiClientFactory,
@@ -143,7 +143,7 @@ describe("settle round", () => {
         let round;
 
         beforeAll(() => {
-            totalMultiplierConsumer.getCurrentMultiplier.mockReturnValue(2);
+            freeSpinStateConsumer.getCurrentMultiplier.mockReturnValue(2);
         });
 
         beforeEach(() => {
@@ -217,7 +217,7 @@ describe("settle round", () => {
                 await consumer.settleRound(player, 2);
 
                 //Assert
-                expect(totalMultiplierConsumer.increaseTotalMultiplier).not.toHaveBeenCalled();
+                expect(freeSpinStateConsumer.increaseTotalMultiplier).not.toHaveBeenCalled();
             });
 
             afterEach(() => {

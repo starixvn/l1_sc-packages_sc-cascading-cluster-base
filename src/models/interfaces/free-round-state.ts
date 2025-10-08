@@ -3,6 +3,6 @@ export interface FreeRoundState {
     roundId: number;
     reelMultipliers: number[][];
     stageQueue: number[];
-    reachedStages: boolean[];
+    currentStage: number;
     rageMeter: number;
 }

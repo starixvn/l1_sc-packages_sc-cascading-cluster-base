@@ -2,18 +2,18 @@ import { round as mathRound } from "mathjs";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
 import { EventPublishers, SlotGameDefinition } from "sc-slot-game-base";
+import Config from "../cluster-board/config";
 import RoundCalculator, { TumbleRecord } from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
 import { Round } from "../models/interfaces";
+import FreeSpinStateConsumer from "./free-spin-state-consumer";
 import FreeSpinsConsumer from "./free-spins-consumer";
-import TotalMultiplierConsumer from "./total-multiplier-consumer";
-import Config from "../cluster-board/config";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
     declare gameData: CascadingClusterGameData;
     declare roundCalculator: RoundCalculator;
     declare freeSpinsConsumer: FreeSpinsConsumer;
-    declare totalMultiplierConsumer: TotalMultiplierConsumer;
+    declare freeSpinStateConsumer: FreeSpinStateConsumer;
     declare definition: SlotGameDefinition;
     declare roundsRepository: mongoose.Model<Round>;
     declare jackpotsPublisher: EventPublishers.JackpotPublisher;
@@ -27,7 +27,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         endGame,
         roundsRepository,
         betsRepository,
-        totalMultiplierConsumer,
+        freeSpinStateConsumer,
         roundCalculator,
         gameManagementApiClientFactory,
     }) {
@@ -43,7 +43,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         });
 
         this.freeSpinsConsumer = freeSpinsConsumer;
-        this.totalMultiplierConsumer = totalMultiplierConsumer;
+        this.freeSpinStateConsumer = freeSpinStateConsumer;
         this.roundCalculator = roundCalculator;
     }
 
@@ -152,7 +152,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
 
         if (totalAvailableFreeSpins === 0) {
-            await this.totalMultiplierConsumer.stopChain(player);
+            await this.freeSpinStateConsumer.stopChain(player);
         }
     }
 

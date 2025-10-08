@@ -38,6 +38,13 @@ export default class RoundCalculator {
     private readonly gameData: CascadingClusterGameData;
     private readonly chance: Chance.Chance;
 
+    private readonly stageProcessors = new Map<number, (result: Result) => Coordinate[]>([
+        [1, (result) => this.processStage1(result)],
+        [2, (result) => this.processStage2(result)],
+        [3, (result) => this.processStage3(result)],
+        [4, (result) => this.processStage4(result)],
+    ]);
+
     constructor({ gameData, boardGenerator }: { gameData: CascadingClusterGameData; boardGenerator: BoardGenerator }) {
         this.stat = new Statistician();
         this.boardGenerator = boardGenerator;
@@ -233,11 +240,9 @@ export default class RoundCalculator {
     }
 
     private updateFeatureTrigger(result: Result): void {
-        for (let i = 0; i < Config.featureRageMeterRequire.length; i++) {
-            if (result.rageCounter >= Config.featureRageMeterRequire[i] && !result.featureTriggered[i]) {
-                result.offerToQueue(i);
-                result.featureTriggered[i] = true;
-            }
+        while (result.rageCounter >= Config.featureRageMeterRequire[result.currentStage + 1] && result.currentStage < 4) {
+            result.currentStage++;
+            result.offerToQueue(result.currentStage);
         }
     }
 
@@ -247,28 +252,15 @@ export default class RoundCalculator {
     } {
         if (!result.isQueueEmpty()) {
             const feature = result.pollFromQueue();
-            let triggeredPositions: Coordinate[] | undefined;
-            if (feature === 0) {
-                triggeredPositions = this.processStage0(result);
-            } else if (feature === 1) {
-                triggeredPositions = this.processStage1(result);
-            } else if (feature === 2) {
-                triggeredPositions = this.processStage2(result);
-            } else if (feature === 3) {
-                triggeredPositions = this.processStage3(result);
-            }
+            const stageProcessor = this.stageProcessors.get(feature);
+            const triggeredPositions = stageProcessor(result);
 
             return { feature, triggeredPositions };
         }
         return {};
     }
 
-    private processStage3(result: Result): Coordinate[] {
-        if (result.category === "Ng") {
-            this.stat.ngRageMeterFreq[3]++;
-        } else if (result.category === "Fg") {
-            this.stat.fgRageMeterFreq[3]++;
-        }
+    private processStage4(result: Result): Coordinate[] {
         // Remove small symbols
         const detonatedPositions: Coordinate[] = [];
         for (let i = 0; i < this.gridSize; i++) {
@@ -283,7 +275,7 @@ export default class RoundCalculator {
         return detonatedPositions;
     }
 
-    private processStage2(result: Result): Coordinate[] {
+    private processStage3(result: Result): Coordinate[] {
         if (result.category === "Ng") {
             this.stat.ngRageMeterFreq[2]++;
         } else if (result.category === "Fg") {
@@ -311,7 +303,7 @@ export default class RoundCalculator {
         return detonatedPositions;
     }
 
-    private processStage1(result: Result): Coordinate[] {
+    private processStage2(result: Result): Coordinate[] {
         if (result.category === "Ng") {
             this.stat.ngRageMeterFreq[1]++;
         } else if (result.category === "Fg") {
@@ -334,7 +326,7 @@ export default class RoundCalculator {
         return detonatedPositions;
     }
 
-    private processStage0(result: Result): Coordinate[] {
+    private processStage1(result: Result): Coordinate[] {
         if (result.category === "Ng") {
             this.stat.ngRageMeterFreq[0]++;
         } else if (result.category === "Fg") {

@@ -1,12 +1,12 @@
+import { Chance } from "chance";
+import { UserInfo, UserSession } from "jest-auto-fixture/src/models";
 import { stub, stubMongoose } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import { SlotGameData } from "sc-slot-game-base";
-import { TotalMultiplierConsumer } from "..";
+import { FreeSpinStateConsumer } from "..";
 import { FreeSpinConsumer } from "../";
-import { UserInfo, UserSession } from "jest-auto-fixture/src/models";
-import { Chance } from "chance";
 
-describe("totalMultiplierConsumer", () => {
+describe("freeSpinStateConsumer", () => {
     let consumer;
 
     const chance = new Chance();
@@ -26,7 +26,7 @@ describe("totalMultiplierConsumer", () => {
         jest.clearAllMocks();
 
         gameData.ingame[player.profile.name] = {};
-        consumer = new TotalMultiplierConsumer(gameData, totalMultiplierRepository, freeSpinConsumer);
+        consumer = new FreeSpinStateConsumer(gameData, totalMultiplierRepository, freeSpinConsumer);
         jest.spyOn(global, "Date").mockReturnValue(mockDate);
     });
 

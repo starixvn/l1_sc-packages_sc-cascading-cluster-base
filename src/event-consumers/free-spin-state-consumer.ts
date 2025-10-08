@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import CascadingClusterGameData from "../game-data";
+import { FreeRoundState, FreeSpinState } from "../models/interfaces";
 import FreeSpinsConsumer from "./free-spins-consumer";
 
-export default class TotalMultiplierConsumer {
+export default class FreeSpinStateConsumer {
     declare gameData: CascadingClusterGameData;
-    declare freeSpinStateRepository: mongoose.Model<any>;
+    declare freeSpinStateRepository: mongoose.Model<FreeSpinState>;
     declare freeSpinsConsumer: FreeSpinsConsumer;
 
     constructor(gameData, freeSpinStateRepository, freeSpinsConsumer) {
@@ -13,13 +14,13 @@ export default class TotalMultiplierConsumer {
         this.freeSpinsConsumer = freeSpinsConsumer;
     }
 
-    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, reachedStages, rageMeter }) {
-        const newRoundRecord = {
+    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, currentStage, rageMeter }) {
+        const newRoundRecord: FreeRoundState = {
             time: new Date(),
             roundId,
             reelMultipliers,
             stageQueue,
-            reachedStages,
+            currentStage,
             rageMeter,
         };
 
@@ -45,7 +46,7 @@ export default class TotalMultiplierConsumer {
         this.gameData.ingame[player.profile.name].freeSpinState = newRoundRecord;
     }
 
-    getCurrentMultiplier(player) {
+    getCurrentState(player) {
         return this.gameData.ingame[player.profile.name].freeSpinState;
     }
 

@@ -7,7 +7,7 @@ import { logger } from "sc-common";
 import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
 import { Crons, EventConsumers } from "sc-slot-game-base";
 import { CascadingBoardGenerator } from "../../board";
-import { FreeSpinsConsumer, TotalMultiplierConsumer } from "../../event-consumers";
+import { FreeSpinsConsumer } from "../../event-consumers";
 import CascadingGameCron from "../cascading-game-cron";
 
 jest.mock("cron");
@@ -41,7 +41,7 @@ describe("gameCron", () => {
     const notificationRepository = stubMongoose(mongoose.Model);
     const exchangeRatesRepository = stubMongoose(mongoose.Model);
     const partnerConfigRepository = stubMongoose(mongoose.Model);
-    const totalMultiplierConsumer = stub(TotalMultiplierConsumer);
+    const freeSpinStateConsumer = stub(freeSpinStateConsumer);
     const boardGenerator = stub(CascadingBoardGenerator);
     const gameManagementApiClientFactory = stub(GameManagementApiClientFactory);
     const gameManagementApiClient = {
@@ -81,7 +81,7 @@ describe("gameCron", () => {
             currencyGroupRepository,
             partnerConfigRepository,
             currencyRepository,
-            totalMultiplierConsumer,
+            freeSpinStateConsumer,
             boardGenerator,
             gameManagementApiClientFactory,
             promotionFreeSpinsConsumer,
@@ -181,7 +181,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(totalMultiplierConsumer.reload).toBeCalled();
+            expect(freeSpinStateConsumer.reload).toBeCalled();
         });
 
         it("should call boardGenerator.initialize", async () => {
@@ -390,7 +390,7 @@ describe("gameCron", () => {
                 await gameCron.proceed();
 
                 // Assert
-                expect(totalMultiplierConsumer.reload).toBeCalled();
+                expect(freeSpinStateConsumer.reload).toBeCalled();
             });
         });
     });

@@ -1,18 +1,17 @@
 import cron from "cron";
-import { Crons, SlotGameData, SlotGameDefinition, EventConsumers, EventPublishers } from "sc-slot-game-base";
-import { SlotGameBot } from "sc-slot-game-base/dist/crons";
-import { FreeSpinsConsumer, SettleGameRoundConsumer, TotalMultiplierConsumer } from "../event-consumers";
-import { Core } from "sc-game-base";
-import { CascadingBoardGenerator } from "../board";
-import { Round } from "../models/interfaces";
 import mongoose from "mongoose";
+import { Core } from "sc-game-base";
 import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
-import { PromotionFreeSpinsConsumer } from "../event-consumers";
+import { Crons, EventConsumers, SlotGameData, SlotGameDefinition } from "sc-slot-game-base";
+import { SlotGameBot } from "sc-slot-game-base/dist/crons";
+import { CascadingBoardGenerator } from "../board";
+import { FreeSpinStateConsumer, FreeSpinsConsumer, PromotionFreeSpinsConsumer, SettleGameRoundConsumer } from "../event-consumers";
 import CascadingClusterGameData from "../game-data";
 import { CascadingClusterGameDefinition } from "../game-definition";
+import { Round } from "../models/interfaces";
 
 export default class CascadingGameCron extends Crons.SlotGameCron {
-    declare totalMultiplierConsumer: TotalMultiplierConsumer;
+    declare freeSpinStateConsumer: FreeSpinStateConsumer;
     declare boardGenerator: CascadingBoardGenerator;
     declare gameData: CascadingClusterGameData;
     declare definition: CascadingClusterGameDefinition;
@@ -30,7 +29,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         roundsRepository,
         roundIdConsumer,
         gameManagementApiClientFactory,
-        totalMultiplierConsumer,
+        freeSpinStateConsumer,
         boardGenerator,
         promotionFreeSpinsConsumer,
     }: {
@@ -46,7 +45,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         roundsRepository: mongoose.Model<Round>;
         roundIdConsumer: EventConsumers.IdCountersConsumer;
         gameManagementApiClientFactory: GameManagementApiClientFactory;
-        totalMultiplierConsumer: TotalMultiplierConsumer;
+        freeSpinStateConsumer: FreeSpinStateConsumer;
         boardGenerator: CascadingBoardGenerator;
         promotionFreeSpinsConsumer: PromotionFreeSpinsConsumer;
     }) {
@@ -66,7 +65,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
             promotionFreeSpinsConsumer,
         } as any);
 
-        this.totalMultiplierConsumer = totalMultiplierConsumer;
+        this.freeSpinStateConsumer = freeSpinStateConsumer;
         this.boardGenerator = boardGenerator;
     }
 
@@ -91,7 +90,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         this.checkPromotionReadiness();
         await this.loadUnsettledBetsToIngame();
         await this.freeSpinsConsumer.reload();
-        await this.totalMultiplierConsumer.reload();
+        await this.freeSpinStateConsumer.reload();
 
         await this.getSettingForNewRound();
         await this.updateExchangeRates();
@@ -131,7 +130,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
 
             await this.promotionFreeSpinsConsumer.loadPromotionsRunning();
             await this.freeSpinsConsumer.reload();
-            await this.totalMultiplierConsumer.reload();
+            await this.freeSpinStateConsumer.reload();
         }
         await this.promotionFreeSpinsConsumer.checkExpiry(this.gameData.gameConfigs.gameId);
     }
