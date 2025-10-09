@@ -6,7 +6,7 @@ import Config from "./config";
 import Coordinate from "./coordinate";
 import Grid from "./grid";
 import Prize from "./prize";
-import Result from "./result";
+import Result, { ResultCategory } from "./result";
 import Statistician from "./Statistician";
 
 export interface TumbleRecord {
@@ -133,7 +133,11 @@ export default class RoundCalculator {
             const win = this.calcPayout(prizeList) * baseBet;
             newResult.winScore += win;
             newResult.rageCounter += this.calcRageMeter(prizeList);
-            this.updateFeatureTrigger(newResult);
+            if (newResult.category === ResultCategory.Fg) {
+                this.updateFgFeatureTrigger(newResult);
+            } else {
+                this.updateFeatureTrigger(newResult);
+            }
             this.markDetonated(newResult, prizeList);
             const newSymbols = this.boardGenerator.detonateAndCascadeBoard(newResult);
 
@@ -246,12 +250,29 @@ export default class RoundCalculator {
         }
     }
 
+    private updateFgFeatureTrigger(result: Result): void {
+        while (result.rageCounter >= Config.featureRageMeterRequire[result.currentStage + 1] && result.currentStage < 4) {
+            result.currentStage++;
+            result.offerToQueue(result.currentStage);
+        }
+
+        if (result.currentStage === 4) {
+            result.rageCounter -= Config.featureRageMeterRequire[4];
+            result.currentStage = 0;
+            while (result.rageCounter >= Config.featureRageMeterRequire[result.currentStage + 1]) {
+                result.currentStage++;
+                result.offerToQueue(result.currentStage);
+            }
+        }
+    }
+
     private processRageMeter(result: Result): {
         feature?: number;
         triggeredPositions?: Coordinate[];
     } {
         if (!result.isQueueEmpty()) {
             const feature = result.pollFromQueue();
+            result.featureTriggered[feature]++;
             const stageProcessor = this.stageProcessors.get(feature);
             const triggeredPositions = stageProcessor(result);
 

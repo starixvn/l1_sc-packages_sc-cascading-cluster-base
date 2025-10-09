@@ -12,7 +12,7 @@ class Result {
     public currentStage: number;
 
     public gridMultipliers: number[][];
-    public featureTriggered: Record<number, boolean>;
+    public featureTriggered: Record<number, number>;
 
     public featureQueue: number[];
 
@@ -30,10 +30,10 @@ class Result {
         this.rageCounter = 0;
         this.gridMultipliers = [];
         this.featureTriggered = {
-            1: false,
-            2: false,
-            3: false,
-            4: false,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
         };
 
         this.featureQueue = [];
