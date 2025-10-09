@@ -28,6 +28,51 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         return betInfo;
     }
 
+    isValidBuyFreeSpin(player) {
+        ///TODO: should check buyFreeSpin enabled
+        return !this.freeSpinsConsumer.hasFreeSpin(player) && !this.isInPromotionPeriod(player);
+    }
+
+    isInPromotionPeriod(player) {
+        return (
+            this.hasValidPromotion(player) &&
+            player.promotion.remainingBonusItems < player.promotion.initialBonusItem &&
+            (player.promotion.remainingBonusItems > 0 || player.promotion.freeSpinAvailable > 0)
+        );
+    }
+
+    async proceedBet(player, payload) {
+        if (payload.buyFreeSpin && !this.isValidBuyFreeSpin(player)) {
+            this.placeBetPublisher.publishGameFailedBet(player.UID, { endBet: -1, notice: { errorCode: helpers.noticeHelper.invalidBet } });
+            return;
+        }
+
+        if (this.gameData.ingame[player.profile.name]?.finish) {
+            this.placeBetPublisher.publishGameFailedBet(player.UID, { endBet: -1, notice: { errorCode: helpers.noticeHelper.cannotPlaceBet } });
+
+            return;
+        }
+
+        const soonestExpiredFreeSpinSet = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(player);
+
+        payload.freeSpin = this.validateFreeSpinEligibility(soonestExpiredFreeSpinSet, player, payload.freeSpin);
+        if (this.hasValidPromotion(player)) {
+            player.promotion.freeSpinAvailable = this.freeSpinsConsumer.getTotalPromotionAvaiableFreeSpins(player);
+        }
+
+        if (payload.freeSpin && !this.hasValidFreeSpinSource(soonestExpiredFreeSpinSet, player)) {
+            if (!payload.autoSettle) {
+                this.handleInvalidFreeSpin(player);
+            }
+            return;
+        }
+
+        this.gameData.roundId = await this.idCountersConsumer.consume("round");
+        const betInfo = await this.generateBetInfo(payload, soonestExpiredFreeSpinSet);
+
+        await super.proceedBet(player, betInfo);
+    }
+
     async upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpinId, applicableInterceptors) {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
@@ -43,6 +88,8 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             coinValue: bet.coinValue,
             betMultiplier: bet.betMultiplier,
             totalAmount: bet.totalAmount,
+            currencyCode: player.session.currencyCode,
+            currencyGroupId: player.session.currencyGroupId,
             rate: rate,
             exchangeRateId: this.gameData.exchangeRates.exId,
             odds: {
@@ -87,12 +134,10 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         if (applicableInterceptors) {
             bet.roundId = roundId;
             bet.betWin = betWin;
+            player.reachMaxWin = reachMaxWin;
 
             await this.executeInterceptorEvent("afterSuccessEvent", applicableInterceptors, {
-                player: {
-                    ...player,
-                    reachMaxWin,
-                },
+                player,
                 bet: {
                     roundId,
                     betWin: betWin,

@@ -23,6 +23,8 @@ export interface Round {
     endTime: Date;
 
     currency: string;
+    currencyCode: string;
+    currencyGroupId: string;
     rate: number;
     exchangeRateId: number;
 

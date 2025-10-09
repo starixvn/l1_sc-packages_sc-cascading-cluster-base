@@ -25,6 +25,8 @@ export default new mongoose.Schema<Round>({
     endTime: { type: Date },
 
     currency: { type: String, require: true },
+    currencyCode: { type: String, require: true },
+    currencyGroupId: { type: String, require: true },
     rate: { type: Number, require: true },
     exchangeRateId: { type: Number, require: true },
 
