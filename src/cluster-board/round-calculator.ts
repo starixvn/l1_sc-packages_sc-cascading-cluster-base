@@ -8,6 +8,7 @@ import Grid from "./grid";
 import Prize from "./prize";
 import Result, { ResultCategory } from "./result";
 import Statistician from "./Statistician";
+import { re } from "mathjs";
 
 export interface TumbleRecord {
     reels: number[][];
@@ -114,9 +115,12 @@ export default class RoundCalculator {
         return result;
     }
 
-    public processSpinning2(round: Round, maxWinPerRound: number, result: Result, generateBoard: (result: Result) => Result): Result {
+    public processSpinning2(round: Round, maxWinPerRound: number, result: Result): Result {
         const baseBet = round.coinValue * round.betLevel;
-        const newResult = generateBoard(result);
+        const newResult =
+            result.category === ResultCategory.Fg
+                ? this.boardGenerator.generateFreeSpinBoard(result, false)
+                : this.boardGenerator.generateBaseGameBoard(result);
         newResult.tumbles.push(
             this.recordTumble({
                 result: newResult,
