@@ -14,7 +14,7 @@ export default class FreeSpinStateConsumer {
         this.freeSpinsConsumer = freeSpinsConsumer;
     }
 
-    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, currentStage, rageMeter, remainingWin }) {
+    async updateFreeSpinState(player, { roundId, reelMultipliers, stageQueue, currentStage, rageMeter, totalWin }) {
         const newRoundRecord: FreeRoundState = {
             time: new Date(),
             roundId,
@@ -22,7 +22,6 @@ export default class FreeSpinStateConsumer {
             stageQueue,
             currentStage,
             rageMeter,
-            remainingWin,
         };
 
         await this.freeSpinStateRepository.updateOne(
@@ -37,6 +36,7 @@ export default class FreeSpinStateConsumer {
                     name: player.profile.name,
                     ended: false,
                     time: new Date(),
+                    totalWin,
                     rounds: [newRoundRecord],
                     ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
                 },
@@ -47,14 +47,22 @@ export default class FreeSpinStateConsumer {
         this.gameData.ingame[player.profile.name].freeSpinState = newRoundRecord;
     }
 
-    getCurrentState(player) {
-        return this.gameData.ingame[player.profile.name].freeSpinState;
+    async initFreeSpinState(player, totalWin) {
+        await this.freeSpinStateRepository.updateOne({ uid: player.UID, ended: false }, { totalWin }, { upsert: true, setDefaultsOnInsert: true });
+        this.gameData.ingame[player.profile.name].freeSpinTotalWin = totalWin;
+    }
+
+    getCurrentState(player): { freeSpinState: FreeRoundState; freeSpinTotalWin: number } {
+        return {
+            freeSpinState: this.gameData.ingame[player.profile.name].freeSpinState,
+            freeSpinTotalWin: this.gameData.ingame[player.profile.name].freeSpinTotalWin,
+        };
     }
 
     async stopChain(player) {
         await this.freeSpinStateRepository.updateOne({ uid: player.UID, ended: false }, { ended: true, endTime: new Date() });
 
-        this.gameData.ingame[player.profile.name].freeSpinState = null;
+        this.resetFreeSpinState(player.profile.name);
     }
 
     async reload() {
@@ -70,11 +78,19 @@ export default class FreeSpinStateConsumer {
                 if (isHavingFreeSpins) {
                     this.gameData.ingame[state.name] = this.gameData.ingame[state.name] ?? { betQueue: [] };
                     this.gameData.ingame[state.name].freeSpinState = latestState;
+                    this.gameData.ingame[state.name].freeSpinTotalWin = state.totalWin;
                 } else {
-                    this.gameData.ingame[state.name] && (this.gameData.ingame[state.name].freeSpinState = null);
+                    if (this.gameData.ingame[state.name]) {
+                        this.resetFreeSpinState(state.name);
+                    }
                     await this.freeSpinStateRepository.updateOne({ uid: state.uid, ended: false }, { ended: true, endTime: new Date() });
                 }
             });
         }
+    }
+
+    resetFreeSpinState(player) {
+        this.gameData.ingame[player.profile.name].freeSpinState = null;
+        this.gameData.ingame[player.profile.name].freeSpinTotalWin = 0;
     }
 }

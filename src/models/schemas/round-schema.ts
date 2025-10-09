@@ -33,4 +33,5 @@ export default new mongoose.Schema<Round>({
     sessionId: { type: String },
     promotionId: { type: String },
     appType: { type: Number },
+    freeSpinId: { type: Number },
 });

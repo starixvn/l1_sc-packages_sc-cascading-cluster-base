@@ -1,6 +1,7 @@
 import { round } from "mathjs";
 import { Crons } from "sc-slot-game-base";
 import CascadingClusterGameData from "../game-data";
+import { helpers } from "sc-common";
 
 export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
     declare gameData: CascadingClusterGameData;
@@ -27,7 +28,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         return betInfo;
     }
 
-    async upsertBet(player, roundId, bet, rate, applicableInterceptors) {
+    async upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpinId, applicableInterceptors) {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         let newBet: any = {
@@ -37,6 +38,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             freeBet: bet.freeBet,
             time: new Date(),
             freeSpin: bet.freeSpin,
+            freeSpinId: freeSpinId,
             betLevel: bet.betLevel,
             coinValue: bet.coinValue,
             betMultiplier: bet.betMultiplier,
@@ -70,23 +72,27 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     }
 
     async handleSuccessBet(player, balance, roundId, bet, applicableInterceptors) {
+        let freeSpinInfo = null;
         if (bet.freeSpin) {
-            await this.freeSpinsConsumer.useFreeSpin(player);
+            freeSpinInfo = await this.freeSpinsConsumer.useFreeSpin(player);
         }
 
         const rate = this.calculateCurrencyRate(player.session);
 
-        await this.upsertBet(player, roundId, bet, rate, applicableInterceptors);
+        await this.upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpinInfo?.id, applicableInterceptors);
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
-        const { betWin } = await this.settleGameRoundConsumer.settlePlayerRound(player, roundId);
+        const { betWin, reachMaxWin } = await this.settleGameRoundConsumer.settlePlayerRound(player, roundId);
 
         if (applicableInterceptors) {
             bet.roundId = roundId;
             bet.betWin = betWin;
 
             await this.executeInterceptorEvent("afterSuccessEvent", applicableInterceptors, {
-                player,
+                player: {
+                    ...player,
+                    reachMaxWin,
+                },
                 bet: {
                     roundId,
                     betWin: betWin,

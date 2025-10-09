@@ -9,6 +9,7 @@ export default new mongoose.Schema<FreeSpinState>({
     ended: { type: Boolean, default: false },
     time: { type: Date },
     endTime: { type: Date },
+    totalWin: { type: Number, default: 0 },
     rounds: { type: [FreeRoundStateSchema] },
     promotionId: { type: String },
 });

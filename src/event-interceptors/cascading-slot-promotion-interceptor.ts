@@ -6,7 +6,8 @@ export default class CascadingSlotPromotionInterceptor extends EventInterceptors
             remainingBonusItems: number;
             freeSpinAvailable: number;
         };
+        reachMaxWin: boolean;
     }) {
-        return player.promotion.remainingBonusItems === 0 && player.promotion.freeSpinAvailable <= 0;
+        return (player.promotion.remainingBonusItems === 0 && player.promotion.freeSpinAvailable <= 0) || !player.reachMaxWin;
     }
 }

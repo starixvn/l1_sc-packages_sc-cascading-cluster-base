@@ -7,6 +7,7 @@ export interface FreeSpinState {
     ended: boolean;
     time: Date;
     endTime: Date;
+    totalWin: number;
     rounds: FreeRoundState[];
     promotionId: string;
 }

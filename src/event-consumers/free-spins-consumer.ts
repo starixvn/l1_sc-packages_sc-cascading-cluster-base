@@ -22,7 +22,6 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
             betLevel,
             coinValue,
             betMultiplier: this.gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
-            //accumulateWin and rageMeter
             expiryTime: player.usePromotion ? player.promotion.endDate : expiryTime,
             ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
         };
@@ -39,10 +38,37 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         if (newlyCreatedFreeSpin) {
             newlyCachedFreeSpin.id = newlyCreatedFreeSpin.id;
             this.gameData.ingame[memberName].freeSpins = this.gameData.ingame[memberName].freeSpins ?? [];
-            //this.gameData.ingame[memberName].freeSpinsRageMeter = 0;
-            //this.gameData.ingame[memberName].freeSpinsAccumulateWin = win from base game;
             this.gameData.ingame[memberName].freeSpins.push(newlyCachedFreeSpin);
             this.updatePlayerPromotionFreeSpins(player, newlyCreatedFreeSpin);
         }
+    }
+
+    queryFreeSpins() {
+        const filter = {
+            available: { $gt: 0 },
+            reachMaxWin: false,
+        };
+        const projection = {
+            _id: false,
+            playerId: false,
+            __v: false,
+            __archive: false,
+        };
+
+        return this.freeSpinsRepository
+            .find(filter, projection, { sort: { expiryTime: 1 } })
+            .lean()
+            .exec();
+    }
+
+    async updateReachMaxWin(player, freeSpinId: number) {
+        await this.freeSpinsRepository.updateOne({ uid: player.UID, id: freeSpinId }, { reachMaxWin: true });
+        this.gameData.ingame[player.profile.name].reachMaxWin = true;
+    }
+
+    getSoonestExpiredFreeSpinSet(player) {
+        const freeSpinsOfPlayer = this.gameData.ingame[player.profile.name]?.freeSpins ?? [];
+
+        return freeSpinsOfPlayer.find((freeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin);
     }
 }

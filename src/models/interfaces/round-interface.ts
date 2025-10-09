@@ -11,6 +11,7 @@ export interface Round {
     totalAmount: number;
     freeSpin: boolean;
     reachMaxWin: boolean;
+    freeSpinId?: number;
 
     result: string;
     settlementResult: any;
