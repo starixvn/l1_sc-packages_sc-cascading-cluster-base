@@ -21,7 +21,12 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             betInfo.betMultiplier = betMultiplier;
         }
 
-        betInfo.totalAmount = round(betInfo.betLevel * betInfo.coinValue * betInfo.betMultiplier, 2);
+        let buyFreeSpinMultiplier = 1;
+        if (payload.buyFreeSpin) {
+            buyFreeSpinMultiplier = 50;
+        }
+
+        betInfo.totalAmount = round(betInfo.betLevel * betInfo.coinValue * betInfo.betMultiplier * buyFreeSpinMultiplier, 2);
         //betInfo.contributionRate = round(contributionRate, 4);
         //betInfo.contributionAmount = round(contributionRate * betInfo.totalAmount, 4);
 
@@ -129,7 +134,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         await this.upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpinInfo?.id, applicableInterceptors);
         this.notifyPlacingBetResult(player, balance, bet, rate);
 
-        const { betWin, reachMaxWin } = await this.settleGameRoundConsumer.settlePlayerRound(player, roundId);
+        const { betWin, reachMaxWin } = await this.settleGameRoundConsumer.settlePlayerRound(player, roundId, bet.buyFreeSpin);
 
         if (applicableInterceptors) {
             bet.roundId = roundId;

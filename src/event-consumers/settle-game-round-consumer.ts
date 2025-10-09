@@ -51,11 +51,11 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         this.boardGenerator = boardGenerator;
     }
 
-    async settlePlayerRound(player: any, roundId: number) {
+    async settlePlayerRound(player: any, roundId: number, buyFreeSpin: boolean) {
         const round = await this.queryRound(roundId);
 
         if (round) {
-            await this.processSpinning(player, round);
+            const spinResult = await this.processSpinning(player, round, buyFreeSpin);
 
             round.paid = true;
             round.endTime = new Date();
@@ -71,7 +71,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             if (round.reachMaxWin) {
                 await this.handleReachMaxWin(player, round);
             } else {
-                await this.processFreeSpins(player, round);
+                await this.processFreeSpins(player, round, spinResult);
             }
 
             await this.userBetResultPublisher.publishToUser(round.uid, this.collectRoundResult(player, round, betResult));
@@ -92,7 +92,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
     }
 
-    async processSpinning(player, round: Round) {
+    async processSpinning(player, round: Round, buyFreeSpin: boolean) {
         // if freespin round, get accumulateWin from ingame (in DB will get from accumulateWin from freespincollection) to compare with maxWin config
         const { result, freeSpinTotalWin } = this.getAccumulateSpinData(player);
         const maxWinPerRound = this.getMaxWin(player, freeSpinTotalWin, round.freeSpin);
@@ -104,7 +104,9 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
 
         if (round.freeSpin) {
-            const spinResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, result);
+            const spinResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, result, (result) => {
+                return this.boardGenerator.generateFreeSpinBoard(result, false);
+            });
             await this.freeSpinStateConsumer.updateFreeSpinState(player, {
                 roundId: round.id,
                 currentStage: spinResult.currentStage,
@@ -115,7 +117,12 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             });
             return spinResult;
         } else {
-            const spinResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult());
+            const spinResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
+                if (buyFreeSpin) {
+                    return this.boardGenerator.generateScatterBoardsRandom(result);
+                }
+                return this.boardGenerator.generateBaseGameBoard(result);
+            });
             return spinResult;
         }
     }
@@ -184,7 +191,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
         return count;
     }
-    async processFreeSpins(player, round) {
+    async processFreeSpins(player, round, spinResult) {
         const { id, settlementResult } = round;
         if (settlementResult.freeSpins?.odds > 0) {
             //should init accumulateWin and rageMeter
@@ -204,7 +211,14 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
 
         if (round.freeSpin && settlementResult.freeSpins?.odds > 0) {
-            await this.freeSpinStateConsumer.initFreeSpinState(player, round.betWin);
+            await this.freeSpinStateConsumer.updateFreeSpinState(player, {
+                roundId: round.id,
+                currentStage: spinResult.currentStage,
+                reelMultipliers: spinResult.gridMultipliers,
+                stageQueue: spinResult.featureQueue,
+                rageMeter: spinResult.rageCounter,
+                totalWin: round.betWin,
+            });
         }
 
         let totalAvailableFreeSpins = this.freeSpinsConsumer.getTotalAvaiableFreeSpins(player);

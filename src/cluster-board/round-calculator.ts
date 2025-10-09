@@ -115,12 +115,9 @@ export default class RoundCalculator {
         return result;
     }
 
-    public processSpinning2(round: Round, maxWinPerRound: number, result: Result): Result {
+    public processSpinning2(round: Round, maxWinPerRound: number, result: Result, generateBoard: (result: Result) => Result): Result {
         const baseBet = round.coinValue * round.betLevel;
-        const newResult =
-            result.category === ResultCategory.Fg
-                ? this.boardGenerator.generateFreeSpinBoard(result, false)
-                : this.boardGenerator.generateBaseGameBoard(result);
+        const newResult = generateBoard(result);
         newResult.tumbles.push(
             this.recordTumble({
                 result: newResult,
