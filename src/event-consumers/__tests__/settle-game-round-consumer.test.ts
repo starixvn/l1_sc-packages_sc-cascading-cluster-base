@@ -335,7 +335,7 @@ describe("SettleGameRoundConsumer", () => {
             expect(round.settlementResult).toBeDefined();
             expect(round.betWin).toBeDefined();
             expect(gameData.settlementResultFromAdmin[player.profile.name]).toBeUndefined();
-            expect(result).toBeUndefined();
+            expect(result).toBeNull();
         });
     });
 
