@@ -388,7 +388,7 @@ describe("SettleGameRoundConsumer", () => {
             gameData.gameConfigs.maxWinPerRound = 100;
 
             // Act
-            const result = consumer.getMaxWin(round as any, 0, false);
+            const result = consumer.getMaxWin(round as any, 0);
 
             // Assert
             expect(result).toBe(1000); // 100 * 0.1 * 5 * 20 = 1000
@@ -396,11 +396,11 @@ describe("SettleGameRoundConsumer", () => {
 
         it("should calculate max win for free spin round with accumulated win", () => {
             // Arrange
-            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false });
+            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: true });
             gameData.gameConfigs.maxWinPerRound = 100;
 
             // Act
-            const result = consumer.getMaxWin(round as any, 50, true);
+            const result = consumer.getMaxWin(round as any, 50);
 
             // Assert
             expect(result).toBe(950); // 1000 - 50 = 950

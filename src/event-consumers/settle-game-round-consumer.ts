@@ -95,7 +95,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     async processSpinning(player, round: Round, buyFreeSpin: boolean) {
         // if freespin round, get accumulateWin from ingame (in DB will get from accumulateWin from freespincollection) to compare with maxWin config
         const { result, freeSpinTotalWin } = this.getAccumulateSpinData(player);
-        const maxWinPerRound = this.getMaxWin(player, freeSpinTotalWin, round.freeSpin);
+        const maxWinPerRound = this.getMaxWin(round, freeSpinTotalWin);
         const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
         if (resultFromAdmin) {
             this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
@@ -140,11 +140,11 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         return { result, freeSpinTotalWin };
     }
 
-    getMaxWin(round: Round, freeSpinTotalWin: number, isFreeSpin: boolean) {
+    getMaxWin(round: Round, freeSpinTotalWin: number) {
         const { maxWinPerRound } = this.gameData.gameConfigs;
         const maxWin = mathRound(maxWinPerRound * round.betLevel * round.coinValue * round.betMultiplier, 2);
 
-        if (isFreeSpin) {
+        if (round.freeSpin) {
             return maxWin - freeSpinTotalWin;
         }
 
