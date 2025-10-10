@@ -37,7 +37,7 @@ describe("freeSpinsConsumer", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        consumer = new FreeSpinsConsumer(chance.natural(), gameData, freeSpinsRepository, idCountersConsumer, gameManagementApiClientFactory);
+        consumer = new FreeSpinsConsumer(chance.natural(), gameData, freeSpinsRepository as any, idCountersConsumer, gameManagementApiClientFactory);
         consumer.roundsRepository = roundsRepository;
         consumer.userSessionsRepository = userSessionsRepository;
     });

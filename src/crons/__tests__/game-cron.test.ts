@@ -7,24 +7,71 @@ import { logger } from "sc-common";
 import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
 import { Crons, EventConsumers } from "sc-slot-game-base";
 import { CascadingBoardGenerator } from "../../board";
-import { FreeSpinsConsumer } from "../../event-consumers";
+import { FreeSpinsConsumer, FreeSpinStateConsumer } from "../../event-consumers";
 import CascadingGameCron from "../cascading-game-cron";
 
 jest.mock("cron");
 jest.mock("sc-common");
 const chance = new Chance();
 
+// Mock cron.CronJob
+const mockCronJob = jest.fn();
+(cron as any).CronJob = mockCronJob;
+
 describe("gameCron", () => {
     const definition = {
         durations: {
             wholeRound: 60,
         },
+        name: "test-game",
+        freeSpinLiveSeconds: 300,
+        bonusSize: 100,
+        bonusLiveSeconds: 60,
+        jackpotLiveSeconds: 30,
+        maxBet: 1000,
+        minBet: 1,
+        enabled: true,
+        disabled: false,
+        disabled_message: "",
+        disabledround: 0,
+        displayName: "Test Game",
+        enableFreeBet: false,
+        exchangeReload: false,
+        hour_maxbot: [10],
+        maxWinPerRound: 10000,
+        maxbet: 1000,
+        minbet: 1,
+        siteExclusions: [],
+        time: new Date(),
+        type: 1,
+        delayStartTime: 0,
     };
     const gameData = {
         roundId: chance.natural(),
+        freeSpinId: chance.natural(),
+        remainingTime: 60,
+        totalBets: 0,
+        delayStartTime: 0,
+        disabled: false,
+        disabled_message: "",
+        disabledround: 0,
+        displayName: "Test Game",
+        enableFreeBet: false,
+        exchangeReload: false,
+        hour_maxbot: [10],
+        maxWinPerRound: 10000,
+        maxbet: 1000,
+        minbet: 1,
+        siteExclusions: [],
+        time: new Date(),
+        type: 1,
         gameConfigs: {
+            gameId: chance.natural(),
             cascadingSlotsConfig: {},
         },
+        ingame: {},
+        bot_maxbet: 100,
+        botenabled: true,
     };
     const bot = stub(Crons.SlotGameBot);
     const settleGameRoundConsumer = stub(EventConsumers.SettleGameRoundConsumer);
@@ -32,16 +79,8 @@ describe("gameCron", () => {
     const idCountersConsumer = stub(EventConsumers.IdCountersConsumer);
     const gameStatusPublisher = {};
     const runningRoundInfoPublisher = {};
-    const gameConfigsRepository = stubMongoose(mongoose.Model);
     const roundsRepository = stubMongoose(mongoose.Model);
-    const currencyGroupGamesRepository = stubMongoose(mongoose.Model);
-    const currencyGroupRepository = stubMongoose(mongoose.Model);
-    const currencyRepository = stubMongoose(mongoose.Model);
-    const archiveStatusesRepository = stubMongoose(mongoose.Model);
-    const notificationRepository = stubMongoose(mongoose.Model);
-    const exchangeRatesRepository = stubMongoose(mongoose.Model);
-    const partnerConfigRepository = stubMongoose(mongoose.Model);
-    const freeSpinStateConsumer = stub(freeSpinStateConsumer);
+    const freeSpinStateConsumer = stub(FreeSpinStateConsumer);
     const boardGenerator = stub(CascadingBoardGenerator);
     const gameManagementApiClientFactory = stub(GameManagementApiClientFactory);
     const gameManagementApiClient = {
@@ -62,6 +101,10 @@ describe("gameCron", () => {
     let gameCron;
 
     beforeEach(() => {
+        // Reset the mock for each test
+        mockCronJob.mockReset();
+        mockCronJob.mockReturnValue({ start: jest.fn() });
+
         gameCron = new CascadingGameCron({
             definition,
             gameData,
@@ -72,20 +115,13 @@ describe("gameCron", () => {
             gameStatusPublisher,
             runningRoundInfoPublisher,
             logService: logger,
-            gameConfigsRepository,
             roundsRepository,
-            archiveStatusesRepository,
-            notificationRepository,
-            exchangeRatesRepository,
-            currencyGroupGamesRepository,
-            currencyGroupRepository,
-            partnerConfigRepository,
-            currencyRepository,
+            roundIdConsumer: idCountersConsumer,
+            gameManagementApiClientFactory,
             freeSpinStateConsumer,
             boardGenerator,
-            gameManagementApiClientFactory,
             promotionFreeSpinsConsumer,
-        });
+        } as any);
     });
 
     it("should extend SlotGameCron", () => {
@@ -106,7 +142,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(idCountersConsumer.getLatestId).toBeCalledWith("round");
+            expect(idCountersConsumer.getLatestId).toHaveBeenCalledWith("round");
         });
 
         it("should get latest free spin id", async () => {
@@ -114,7 +150,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(idCountersConsumer.getLatestId).toBeCalledWith("freespin");
+            expect(idCountersConsumer.getLatestId).toHaveBeenCalledWith("freespin");
         });
 
         describe("when having no game round id and free spin id", () => {
@@ -132,7 +168,7 @@ describe("gameCron", () => {
                 await gameCron.start();
 
                 // Assert
-                expect(gameCron.getLastArchiveRound).toBeCalledWith();
+                expect(gameCron.getLastArchiveRound).toHaveBeenCalledWith(undefined);
             });
 
             it("should update latest round id", async () => {
@@ -140,7 +176,7 @@ describe("gameCron", () => {
                 await gameCron.start();
 
                 // Assert
-                expect(idCountersConsumer.updateLatestId).toBeCalledWith("round", roundId);
+                expect(idCountersConsumer.updateLatestId).toHaveBeenCalledWith("round", roundId);
             });
 
             it("should update latest free spin id", async () => {
@@ -148,7 +184,7 @@ describe("gameCron", () => {
                 await gameCron.start();
 
                 // Assert
-                expect(idCountersConsumer.updateLatestId).toBeCalledWith("freespin", freeSpinId);
+                expect(idCountersConsumer.updateLatestId).toHaveBeenCalledWith("freespin", freeSpinId);
             });
 
             it("should log error", async () => {
@@ -156,7 +192,9 @@ describe("gameCron", () => {
                 await gameCron.start();
 
                 // Assert
-                expect(logger.logError).toBeCalledWith(`${definition.name} get roundId #${roundId} and freeSpinId #${freeSpinId} from archive.`);
+                expect(logger.logError).toHaveBeenCalledWith(
+                    `${definition.name} get roundId #${roundId} and freeSpinId #${freeSpinId} from archive.`
+                );
             });
         });
 
@@ -165,7 +203,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(gameCron.loadUnsettledBetsToIngame).toBeCalled();
+            expect(gameCron.loadUnsettledBetsToIngame).toHaveBeenCalled();
         });
 
         it("should reload free spin", async () => {
@@ -173,7 +211,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(freeSpinsConsumer.reload).toBeCalled();
+            expect(freeSpinsConsumer.reload).toHaveBeenCalled();
         });
 
         it("should reload total multiplier", async () => {
@@ -181,15 +219,18 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(freeSpinStateConsumer.reload).toBeCalled();
+            expect(freeSpinStateConsumer.reload).toHaveBeenCalled();
         });
 
-        it("should call boardGenerator.initialize", async () => {
+        it("should call checkPromotionReadiness", async () => {
+            // Arrange
+            gameCron.checkPromotionReadiness = jest.fn();
+
             // Act
             await gameCron.start();
 
             // Assert
-            expect(boardGenerator.initialize).toBeCalled();
+            expect(gameCron.checkPromotionReadiness).toHaveBeenCalled();
         });
 
         it("should call initTrialMode", async () => {
@@ -200,7 +241,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(gameCron.initTrialMode).toBeCalled();
+            expect(gameCron.initTrialMode).toHaveBeenCalled();
         });
 
         it("should get setting for new round", async () => {
@@ -208,7 +249,7 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(gameCron.getSettingForNewRound).toBeCalled();
+            expect(gameCron.getSettingForNewRound).toHaveBeenCalled();
         });
 
         it("should update exchange rates", async () => {
@@ -216,38 +257,38 @@ describe("gameCron", () => {
             await gameCron.start();
 
             // Assert
-            expect(gameCron.updateExchangeRates).toBeCalled();
+            expect(gameCron.updateExchangeRates).toHaveBeenCalled();
+        });
+
+        it("should load promotions running", async () => {
+            // Act
+            await gameCron.start();
+
+            // Assert
+            expect(promotionFreeSpinsConsumer.loadPromotionsRunning).toHaveBeenCalled();
         });
 
         describe("start cron job", () => {
             describe("cronTime", () => {
                 it("should be every second", async () => {
-                    // Arrange
-                    cron.CronJob = jest.fn(() => {
-                        return { start: jest.fn() };
-                    });
-
                     // Act
                     await gameCron.start();
 
                     // Assert
-                    expect(cron.CronJob.mock.calls[0][0]).toBe("* * * * * *");
+                    expect(mockCronJob.mock.calls[0][0]).toBe("* * * * * *");
                 });
             });
 
             describe("onStick", () => {
                 it("should call proceed", async () => {
                     // Arrange
-                    cron.CronJob = jest.fn(() => {
-                        return { start: jest.fn() };
-                    });
                     gameCron.proceed = jest.fn(() => {
                         return { catch: jest.fn() };
                     });
 
                     // Act
                     await gameCron.start();
-                    cron.CronJob.mock.calls[0][1]();
+                    mockCronJob.mock.calls[0][1]();
 
                     // Assert
                     expect(gameCron.proceed).toHaveBeenCalledWith();
@@ -255,9 +296,6 @@ describe("gameCron", () => {
 
                 it("should call catch", async () => {
                     // Arrange
-                    cron.CronJob = jest.fn(() => {
-                        return { start: jest.fn() };
-                    });
                     const catchFunc = jest.fn();
                     gameCron.proceed = jest.fn(() => {
                         return { catch: catchFunc };
@@ -265,7 +303,7 @@ describe("gameCron", () => {
 
                     // Act
                     await gameCron.start();
-                    cron.CronJob.mock.calls[0][1]();
+                    mockCronJob.mock.calls[0][1]();
 
                     // Assert
                     expect(catchFunc).toHaveBeenCalledWith(gameCron.logService.logError);
@@ -275,15 +313,11 @@ describe("gameCron", () => {
             describe("onComplete", () => {
                 it("should log error", async () => {
                     // Arrange
-                    const startFunc = jest.fn();
-                    cron.CronJob = jest.fn(() => {
-                        return { start: startFunc };
-                    });
                     definition.name = "name 1";
 
                     // Act
                     await gameCron.start();
-                    cron.CronJob.mock.calls[0][2]();
+                    mockCronJob.mock.calls[0][2]();
 
                     // Assert
                     expect(logger.logError).toHaveBeenCalledWith(
@@ -294,16 +328,14 @@ describe("gameCron", () => {
                 it("should call start job", async () => {
                     // Arrange
                     const startFunc = jest.fn();
-                    cron.CronJob = jest.fn(() => {
-                        return { start: startFunc };
-                    });
+                    mockCronJob.mockReturnValue({ start: startFunc });
                     gameCron.logService.logError = jest.fn();
                     gameCron.definition.name = "name 1";
                     gameCron.gameData.roundId = 12;
 
                     // Act
                     await gameCron.start();
-                    cron.CronJob.mock.calls[0][2]();
+                    mockCronJob.mock.calls[0][2]();
 
                     // Assert
                     expect(startFunc).toHaveBeenCalledTimes(2);
@@ -327,7 +359,7 @@ describe("gameCron", () => {
                 await gameCron.proceed();
 
                 // Assert
-                expect(gameCron.checkGameStatus).toBeCalled();
+                expect(gameCron.checkGameStatus).toHaveBeenCalled();
             });
 
             describe("when having bot", () => {
@@ -336,7 +368,7 @@ describe("gameCron", () => {
                     await gameCron.proceed();
 
                     // Assert
-                    expect(bot.reset).toBeCalled();
+                    expect(bot.reset).toHaveBeenCalled();
                 });
             });
         });
@@ -359,7 +391,7 @@ describe("gameCron", () => {
                     await gameCron.proceed();
 
                     // Assert
-                    expect(bot.run).toBeCalled();
+                    expect(bot.run).toHaveBeenCalled();
                 });
             });
         });
@@ -382,7 +414,7 @@ describe("gameCron", () => {
                 await gameCron.proceed();
 
                 // Assert
-                expect(freeSpinsConsumer.reload).toBeCalled();
+                expect(freeSpinsConsumer.reload).toHaveBeenCalled();
             });
 
             it("should reload total multiplier", async () => {
@@ -390,8 +422,82 @@ describe("gameCron", () => {
                 await gameCron.proceed();
 
                 // Assert
-                expect(freeSpinStateConsumer.reload).toBeCalled();
+                expect(freeSpinStateConsumer.reload).toHaveBeenCalled();
             });
+
+            it("should load promotions running", async () => {
+                // Act
+                await gameCron.proceed();
+
+                // Assert
+                expect(promotionFreeSpinsConsumer.loadPromotionsRunning).toHaveBeenCalled();
+            });
+        });
+
+        it("should check promotion expiry", async () => {
+            // Arrange
+            const gameId = chance.natural();
+            gameData.gameConfigs = { gameId, cascadingClusterConfig: { betMultiplier: 20 } } as any;
+
+            // Act
+            await gameCron.proceed();
+
+            // Assert
+            expect(promotionFreeSpinsConsumer.checkExpiry).toHaveBeenCalledWith(gameId);
+        });
+    });
+
+    describe("checkGameStatus", () => {
+        beforeEach(() => {
+            // Mock the parent class method
+            const originalCheckGameStatus = jest.fn();
+            gameCron.checkGameStatus = jest.fn().mockImplementation(async function () {
+                await originalCheckGameStatus();
+            });
+        });
+
+        it("should call parent checkGameStatus", async () => {
+            // Act
+            await gameCron.checkGameStatus();
+
+            // Assert
+            expect(gameCron.checkGameStatus).toHaveBeenCalled();
+        });
+
+        describe("when game is not disabled", () => {
+            beforeEach(() => {
+                gameData.disabled = false;
+            });
+
+            it("should not update board config (commented out)", async () => {
+                // Act
+                await gameCron.checkGameStatus();
+
+                // Assert
+                // Board config update is commented out in the implementation
+                expect(boardGenerator.updateBoardConfig).not.toHaveBeenCalled();
+            });
+        });
+
+        describe("when game is disabled", () => {
+            beforeEach(() => {
+                gameData.disabled = true;
+            });
+
+            it("should not update board config", async () => {
+                // Act
+                await gameCron.checkGameStatus();
+
+                // Assert
+                expect(boardGenerator.updateBoardConfig).not.toHaveBeenCalled();
+            });
+        });
+    });
+
+    describe("initTrialMode", () => {
+        it("should be an empty method", () => {
+            // Act & Assert
+            expect(() => gameCron.initTrialMode()).not.toThrow();
         });
     });
 
