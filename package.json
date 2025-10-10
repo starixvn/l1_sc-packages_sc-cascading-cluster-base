@@ -15,7 +15,7 @@
         "reg": "npm set registry http://npm.lumigame.com",
         "pub": "npm publish --registry http://npm.lumigame.com",
         "betaver": "npm version prerelease --preid beta",
-        "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
+        "pubbeta": "tsc && npm publish --registry http://npm.lumigame.com --tag beta",
         "semantic-release": "semantic-release",
         "simulation": "tsx src/simulation/original-odds.ts",
         "prepare-husky": "husky",
