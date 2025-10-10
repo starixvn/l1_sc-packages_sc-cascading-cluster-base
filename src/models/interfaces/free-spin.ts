@@ -13,4 +13,5 @@ export interface FreeSpin {
     coinValue: number;
     betMultiplier: number;
     promotionId: string;
+    reachMaxWin: boolean;
 }

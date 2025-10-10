@@ -16,5 +16,6 @@ export default new mongoose.Schema<FreeSpin>({
     coinValue: { type: Number, require: true },
     betMultiplier: { type: Number, require: true },
     promotionId: { type: String, required: false },
+    reachMaxWin: { type: Boolean, default: false },
     //should add accumulateWin and accumulateRageMeter to keep accumulate win of freespin round
 });

@@ -1,9 +1,7 @@
 import { EventConsumers } from "sc-slot-game-base";
-import CascadingClusterGameData from "../game-data";
-import { Round } from "../models/interfaces/round-interface";
+import CascadingClusterGameData from "../game-data.js";
+import { Round, FreeSpin, Player } from "../models/interfaces";
 import mongoose from "mongoose";
-import { FreeSpin } from "../models/interfaces";
-``;
 
 export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer {
     declare gameData: CascadingClusterGameData;
@@ -167,9 +165,9 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         this.gameData.ingame[player.profile.name].reachMaxWin = true;
     }
 
-    getSoonestExpiredFreeSpinSet(player) {
-        const freeSpinsOfPlayer = this.gameData.ingame[player.profile.name]?.freeSpins ?? [];
+    getSoonestExpiredFreeSpinSet(player: Player) {
+        const freeSpinsOfPlayer = this.gameData.ingame[player.profile.name]?.freeSpins ?? ([] as FreeSpin[]);
 
-        return freeSpinsOfPlayer.find((freeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin);
+        return freeSpinsOfPlayer.find((freeSpin: FreeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin);
     }
 }

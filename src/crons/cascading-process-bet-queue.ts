@@ -129,6 +129,12 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             freeSpinInfo = await this.freeSpinsConsumer.useFreeSpin(player);
         }
 
+        if (freeSpinInfo) {
+            bet.coinValue = freeSpinInfo.coinValue;
+            bet.betLevel = freeSpinInfo.betLevel;
+            bet.betMultiplier = freeSpinInfo.betMultiplier;
+        }
+
         const rate = this.calculateCurrencyRate(player.session);
 
         await this.upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpinInfo?.id, applicableInterceptors);

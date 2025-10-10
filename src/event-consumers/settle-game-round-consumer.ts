@@ -5,7 +5,7 @@ import { EventPublishers, SlotGameDefinition } from "sc-slot-game-base";
 import Config from "../cluster-board/config";
 import RoundCalculator, { TumbleRecord } from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
-import { Round } from "../models/interfaces";
+import { Player, Round } from "../models/interfaces";
 import FreeSpinStateConsumer from "./free-spin-state-consumer";
 import FreeSpinsConsumer from "./free-spins-consumer";
 import { BoardGenerator, FgResult, NgResult, Result } from "../cluster-board";
@@ -79,7 +79,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             return { betWin: round.betWin, reachMaxWin: round.reachMaxWin };
         }
 
-        return { betWin: 0 };
+        return { betWin: 0, reachMaxWin: false };
     }
 
     async handleReachMaxWin(player, round: Round) {
@@ -127,7 +127,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
     }
 
-    getAccumulateSpinData(player): { result: Result; freeSpinTotalWin: number } {
+    getAccumulateSpinData(player: Player): { result: Result; freeSpinTotalWin: number } {
         const { freeSpinState, freeSpinTotalWin } = this.freeSpinStateConsumer.getCurrentState(player);
         const result = new FgResult();
         if (freeSpinState) {
@@ -141,9 +141,9 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         return { result, freeSpinTotalWin };
     }
 
-    getMaxWin(player, freeSpinTotalWin: number, isFreeSpin: boolean) {
+    getMaxWin(round: Round, freeSpinTotalWin: number, isFreeSpin: boolean) {
         const { maxWinPerRound } = this.gameData.gameConfigs;
-        const maxWin = mathRound(maxWinPerRound * player.session.totalAmount, 2);
+        const maxWin = mathRound(maxWinPerRound * round.betLevel * round.coinValue * round.betMultiplier, 2);
 
         if (isFreeSpin) {
             return maxWin - freeSpinTotalWin;
