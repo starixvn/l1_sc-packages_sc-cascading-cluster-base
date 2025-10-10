@@ -8,7 +8,6 @@ import Grid from "./grid";
 import Prize from "./prize";
 import Result, { ResultCategory } from "./result";
 import Statistician from "./Statistician";
-import { re } from "mathjs";
 
 export interface TumbleRecord {
     reels: number[][];
@@ -31,10 +30,6 @@ export interface TumbleRecord {
 export default class RoundCalculator {
     private readonly gridSize: number = 6;
     public static readonly minLinkRequirement: number = 5;
-
-    private readonly maxPayout: number = 10000;
-    private stat: Statistician;
-    private currScNumber: number;
     private readonly boardGenerator: BoardGenerator;
     private readonly gameData: CascadingClusterGameData;
     private readonly chance: Chance.Chance;
@@ -47,7 +42,6 @@ export default class RoundCalculator {
     ]);
 
     constructor({ gameData, boardGenerator }: { gameData: CascadingClusterGameData; boardGenerator: BoardGenerator }) {
-        this.stat = new Statistician();
         this.boardGenerator = boardGenerator;
         this.gameData = gameData;
         this.chance = new Chance();
@@ -65,7 +59,7 @@ export default class RoundCalculator {
                 newSymbols: [],
             })
         );
-        let prizeList: Prize[] = [];
+        const prizeList: Prize[] = [];
         this.calcPrize(result, prizeList);
 
         while (prizeList.length > 0 && result.winScore < maxWinPerRound) {
@@ -127,7 +121,7 @@ export default class RoundCalculator {
                 newSymbols: [],
             })
         );
-        let prizeList: Prize[] = [];
+        const prizeList: Prize[] = [];
         this.calcPrize(newResult, prizeList);
 
         while (prizeList.length > 0 && newResult.winScore < maxWinPerRound) {
@@ -298,12 +292,6 @@ export default class RoundCalculator {
     }
 
     private processStage3(result: Result): Coordinate[] {
-        if (result.category === "Ng") {
-            this.stat.ngRageMeterFreq[2]++;
-        } else if (result.category === "Fg") {
-            this.stat.fgRageMeterFreq[2]++;
-        }
-
         // Rand select 2 col to remove
         const detonatedPositions: Coordinate[] = [];
         const colIndex = [0, 1, 2, 3, 4, 5];
@@ -326,11 +314,6 @@ export default class RoundCalculator {
     }
 
     private processStage2(result: Result): Coordinate[] {
-        if (result.category === "Ng") {
-            this.stat.ngRageMeterFreq[1]++;
-        } else if (result.category === "Fg") {
-            this.stat.fgRageMeterFreq[1]++;
-        }
         // remove 3 x 3 (excl. SC)
         const detonatedPositions: Coordinate[] = [];
         const x = this.chance.integer({ min: 0, max: this.gridSize - 3 });
@@ -349,12 +332,6 @@ export default class RoundCalculator {
     }
 
     private processStage1(result: Result): Coordinate[] {
-        if (result.category === "Ng") {
-            this.stat.ngRageMeterFreq[0]++;
-        } else if (result.category === "Fg") {
-            this.stat.fgRageMeterFreq[0]++;
-        }
-
         const validPositions: Coordinate[] = [];
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
@@ -383,8 +360,8 @@ export default class RoundCalculator {
 
     private calcRageMeter(prizeList: Prize[]): number {
         let result = 0;
-        for (let i = 0; i < prizeList.length; i++) {
-            result += prizeList[i].link;
+        for (const prize of prizeList) {
+            result += prize.link;
         }
         return result;
     }
@@ -398,10 +375,10 @@ export default class RoundCalculator {
     }
 
     private markDetonated(result: Result, prizeList: Prize[]): void {
-        for (let i = 0; i < prizeList.length; i++) {
-            for (let j = 0; j < prizeList[i].position.length; j++) {
-                const x = prizeList[i].position[j].x;
-                const y = prizeList[i].position[j].y;
+        for (const prize of prizeList) {
+            for (const position of prize.position) {
+                const x = position.x;
+                const y = position.y;
                 result.reels[x][y].isDetonated = true;
             }
         }
@@ -426,8 +403,8 @@ export default class RoundCalculator {
     }
 
     private calcMulti(prizeList: Prize[], gridMulti: number[][]): void {
-        for (let i = 0; i < prizeList.length; i++) {
-            prizeList[i].multiplier = this.calcPrizeMulti(prizeList[i].position, gridMulti);
+        for (const prize of prizeList) {
+            prize.multiplier = this.calcPrizeMulti(prize.position, gridMulti);
         }
     }
 
@@ -435,9 +412,9 @@ export default class RoundCalculator {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         let result = 0;
-        for (let i = 0; i < position.length; i++) {
-            const x = position[i].x;
-            const y = position[i].y;
+        for (const pos of position) {
+            const x = pos.x;
+            const y = pos.y;
             if (gridMulti[x][y] > 0) {
                 if (gridMulti[x][y] * 2 >= cascadingClusterConfig.tileMultiplier.max) {
                     result += cascadingClusterConfig.tileMultiplier.max;
@@ -450,7 +427,9 @@ export default class RoundCalculator {
         }
         if (result > 0) {
             return result;
-        } else return 1;
+        } else {
+            return 1;
+        }
     }
 
     private calcPayout(prizeList: Prize[]): number {

@@ -1,11 +1,10 @@
-import CascadingClusterGameData from "../game-data";
 import BoardGenerator from "../cluster-board/board-generator";
-import Result from "../cluster-board/result";
 import FgResult from "../cluster-board/fg-result";
 import NgResult from "../cluster-board/ng-result";
 import Prize from "../cluster-board/prize";
-import { ResultCategory } from "../cluster-board/result";
+import Result, { ResultCategory } from "../cluster-board/result";
 import RoundCalculator, { TumbleRecord } from "../cluster-board/round-calculator";
+import CascadingClusterGameData from "../game-data";
 import Statistician from "./Statistician";
 
-export { CascadingClusterGameData, BoardGenerator, FgResult, NgResult, Prize, ResultCategory, RoundCalculator, Statistician, TumbleRecord, Result };
+export { BoardGenerator, CascadingClusterGameData, FgResult, NgResult, Prize, Result, ResultCategory, RoundCalculator, Statistician, TumbleRecord };
