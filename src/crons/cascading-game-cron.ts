@@ -95,7 +95,6 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         await this.getSettingForNewRound();
         await this.updateExchangeRates();
         await this.promotionFreeSpinsConsumer.loadPromotionsRunning();
-        // this.boardGenerator.initialize();
         this.initTrialMode();
 
         const job = new cron.CronJob(
@@ -139,9 +138,9 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
         await super.checkGameStatus();
 
         if (!this.gameData.disabled) {
-            ///TODO: Update board config
-            //const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingClusterConfig;
-            //this.boardGenerator.updateBoardConfig(difficulty, multiplierBonus.min, multiplierBonus.max);
+            // TODO: Update board config
+            // const { multiplierBonus, mode: difficulty } = this.gameData.gameConfigs.cascadingClusterConfig;
+            // this.boardGenerator.updateBoardConfig(difficulty, multiplierBonus.min, multiplierBonus.max);
         }
     }
 

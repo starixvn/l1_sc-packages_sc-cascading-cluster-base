@@ -7,7 +7,6 @@ import Coordinate from "./coordinate";
 import Grid from "./grid";
 import Prize from "./prize";
 import Result, { ResultCategory } from "./result";
-import Statistician from "./Statistician";
 
 export interface TumbleRecord {
     reels: number[][];
@@ -436,13 +435,13 @@ export default class RoundCalculator {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
         const { odds } = cascadingClusterConfig;
         let result = 0.0;
-        for (let i = 0; i < prizeList.length; i++) {
-            const symbolOdds = odds[prizeList[i].symbol].find((x) => prizeList[i].link >= x.from && prizeList[i].link <= x.to);
+        for (const prize of prizeList) {
+            const symbolOdds = odds[prize.symbol].find((x) => prize.link >= x.from && prize.link <= x.to);
 
-            prizeList[i].odds = symbolOdds?.odds ?? 0;
-            prizeList[i].winScore = prizeList[i].odds * prizeList[i].multiplier;
+            prize.odds = symbolOdds?.odds ?? 0;
+            prize.winScore = prize.odds * prize.multiplier;
 
-            result += prizeList[i].winScore;
+            result += prize.winScore;
         }
         return result;
     }
@@ -472,7 +471,9 @@ export default class RoundCalculator {
         if (grid[i][j].symbol === prize.symbol) {
             prize.position.push(new Coordinate(i, j));
             return this.walk(i, j, prize, grid);
-        } else return 0;
+        } else {
+            return 0;
+        }
     }
 
     private checkPositionLegit(i: number, j: number): boolean {

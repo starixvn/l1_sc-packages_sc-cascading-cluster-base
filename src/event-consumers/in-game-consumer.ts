@@ -41,7 +41,14 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         const maxWinPerRound = settings?.maxWinPerRound;
         const defaultCoinValue = settings?.defaultCoinValue;
 
-        const { betLevels, betMultiplier, odds, freeSpins: freeSpinsConfig, bigWinRatio, rageMeters } = this.gameData.gameConfigs.cascadingClusterConfig;
+        const {
+            betLevels,
+            betMultiplier,
+            odds,
+            freeSpins: freeSpinsConfig,
+            bigWinRatio,
+            rageMeters,
+        } = this.gameData.gameConfigs.cascadingClusterConfig;
         const gameConfigs = {
             coinValues,
             maxWinPerRound,
@@ -53,7 +60,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             rageMeters,
         };
 
-        //todo: get is features enabled from database
+        // TODO: get is features enabled from database
         const features = this.getFeatures(true);
         const freeSpins = this.getAvailableFreeSpins(realPlayer);
 
@@ -136,7 +143,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             promotionId: soonestExpiredFreeSpin?.promotionId,
             buyFreeSpins,
             multiplier,
-            rageMeterPoint
+            rageMeterPoint,
         };
     }
 
@@ -144,12 +151,12 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
         return {
             buyFreeSpins: {
                 enabled: isEnabled,
-                multiplier: 50
+                multiplier: 50,
             },
             buySuperFreeSpins: {
                 enabled: isEnabled,
-                multiplier: 500
-            }
-        }
+                multiplier: 500,
+            },
+        };
     }
 }

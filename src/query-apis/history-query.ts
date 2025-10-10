@@ -45,9 +45,9 @@ export default class HistoryQuery {
         const totalMultipliers = (await this.totalMultiplierRepository.find({ uid: player.UID }).lean().exec()) ?? [];
 
         const betLogs = rawBetLogs.map((rawBetLog) => {
-            const betLog = { ...rawBetLog };
+            const betLog: any = { ...rawBetLog };
             if (betLog.freeSpin) {
-                (betLog as any).totalMultipliers = totalMultipliers.find((t) => t.rounds.some((r) => r.roundId === rawBetLog.id));
+                betLog.totalMultipliers = totalMultipliers.find((t) => t.rounds.some((r) => r.roundId === rawBetLog.id));
             }
 
             return betLog;

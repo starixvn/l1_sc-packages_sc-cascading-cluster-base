@@ -1,4 +1,4 @@
-import { round as mathRound, re } from "mathjs";
+import { round as mathRound } from "mathjs";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
 import { EventPublishers, SlotGameDefinition } from "sc-slot-game-base";
@@ -100,7 +100,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         if (resultFromAdmin) {
             this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
             delete this.gameData.settlementResultFromAdmin[player.profile.name];
-            return;
+            return null;
         }
 
         if (round.freeSpin) {
@@ -117,13 +117,12 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             });
             return spinResult;
         } else {
-            const spinResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
+            return this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
                 if (buyFreeSpin) {
                     return this.boardGenerator.generateScatterBoardsRandom(result);
                 }
                 return this.boardGenerator.generateBaseGameBoard(result);
             });
-            return spinResult;
         }
     }
 
@@ -233,7 +232,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     }
 
     async queryRound(roundId) {
-        return await this.roundsRepository.findOne({ id: roundId, paid: false }).exec();
+        return this.roundsRepository.findOne({ id: roundId, paid: false }).exec();
     }
 
     calculateBetResult(round): any {

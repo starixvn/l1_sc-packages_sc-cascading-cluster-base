@@ -6,10 +6,9 @@ import { helpers } from "sc-common";
 export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
     declare gameData: CascadingClusterGameData;
     async generateBetInfo(payload, freeSpinInfo) {
-        ///TODO: Review contribution rate
+        // TODO: Review contribution rate
         const betInfo = { ...payload };
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
-        //const contributionRate = cascadingClusterConfig.jackpot ? cascadingClusterConfig.jackpot.playerContributionRatio : 0;
 
         betInfo.betMultiplier = cascadingClusterConfig.betMultiplier;
 
@@ -27,14 +26,12 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
         }
 
         betInfo.totalAmount = round(betInfo.betLevel * betInfo.coinValue * betInfo.betMultiplier * buyFreeSpinMultiplier, 2);
-        //betInfo.contributionRate = round(contributionRate, 4);
-        //betInfo.contributionAmount = round(contributionRate * betInfo.totalAmount, 4);
 
         return betInfo;
     }
 
     isValidBuyFreeSpin(player) {
-        ///TODO: should check buyFreeSpin enabled
+        // TODO: should check buyFreeSpin enabled
         return !this.freeSpinsConsumer.hasFreeSpin(player) && !this.isInPromotionPeriod(player);
     }
 
