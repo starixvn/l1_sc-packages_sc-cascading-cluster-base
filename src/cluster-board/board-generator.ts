@@ -9,8 +9,6 @@ export default class BoardGenerator {
     private readonly gridSize: number = 6;
     private readonly chance: Chance.Chance;
     private readonly notWinSymbolSets: number[];
-    private readonly minScatter: number = 4;
-    private readonly maxScatter: number = 15;
 
     constructor() {
         this.chance = new Chance();
@@ -117,7 +115,8 @@ export default class BoardGenerator {
     }
 
     generateScatterBoardsRandom(result: Result): Result {
-        const numberOfScatterRandom = this.chance.integer({ min: this.minScatter, max: this.maxScatter });
+        const range = this.chance.weighted(Config.scatterCounts, Config.scatterWeight);
+        const numberOfScatterRandom = this.chance.integer({ min: range.min, max: range.max });
         result.gridMultipliers = this.initializeGridMultiplier();
         result.featureQueue = [];
         return this.generateScatterBoards(result, numberOfScatterRandom);
