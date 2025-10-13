@@ -113,7 +113,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 reelMultipliers: spinResult.gridMultipliers,
                 stageQueue: spinResult.featureQueue,
                 rageMeter: spinResult.rageCounter,
-                totalWin: freeSpinTotalWin + round.betWin,
+                totalWin: round.betWin,
             });
             return spinResult;
         } else {

@@ -30,13 +30,15 @@ export default class FreeSpinStateConsumer {
                 $push: {
                     rounds: newRoundRecord,
                 },
+                $inc: {
+                    totalWin: totalWin,
+                },
                 $setOnInsert: {
                     uid: player.UID,
                     playerId: player.session?.playerId,
                     name: player.profile.name,
                     ended: false,
                     time: new Date(),
-                    totalWin,
                     ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
                 },
             },
