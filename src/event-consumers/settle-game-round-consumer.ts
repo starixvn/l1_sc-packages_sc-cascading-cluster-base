@@ -202,6 +202,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     betLevel: round.betLevel,
                     betMultiplier: round.betMultiplier,
                     numberOfFreeSpins: settlementResult.freeSpins.odds,
+                    reachMaxWin: round.reachMaxWin,
                 },
                 this.definition.freeSpinLiveSeconds
             );
