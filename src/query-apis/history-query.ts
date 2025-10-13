@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-import { Round } from "../models/interfaces";
+import { FreeSpinState, Round } from "../models/interfaces";
 
 export default class HistoryQuery {
     declare roundsRepository: mongoose.Model<Round>;
-    declare totalMultiplierRepository: mongoose.Model<any>;
+    declare freeSpinStateRepository: mongoose.Model<FreeSpinState>;
 
-    constructor(roundsRepository: mongoose.Model<Round>, totalMultiplierRepository: mongoose.Model<any>) {
+    constructor(roundsRepository: mongoose.Model<Round>, freeSpinStateRepository: mongoose.Model<FreeSpinState>) {
+        this.freeSpinStateRepository = freeSpinStateRepository;
         this.roundsRepository = roundsRepository;
-        this.totalMultiplierRepository = totalMultiplierRepository;
     }
 
     async queryHistory(player: { UID: string }, page: number, pageSize: number) {
@@ -42,12 +42,12 @@ export default class HistoryQuery {
             .lean()
             .exec();
 
-        const totalMultipliers = (await this.totalMultiplierRepository.find({ uid: player.UID }).lean().exec()) ?? [];
+        const freeSpinStates = (await this.freeSpinStateRepository.find({ uid: player.UID }).lean().exec()) ?? [];
 
         const betLogs = rawBetLogs.map((rawBetLog) => {
             const betLog: any = { ...rawBetLog };
             if (betLog.freeSpin) {
-                betLog.totalMultipliers = totalMultipliers.find((t) => t.rounds.some((r) => r.roundId === rawBetLog.id));
+                betLog.totalMultipliers = freeSpinStates.find((t) => t.rounds.some((r) => r.roundId === rawBetLog.id));
             }
 
             return betLog;
