@@ -15,12 +15,8 @@ class Config {
     public static readonly phase4replaceSymbol = [0, 1, 2, 3];
     public static readonly phase4replaceSymbolWeight = [10, 12, 14, 15];
 
-    public static readonly scatterWeight: number[] = [90, 1, 1];
-    public static readonly scatterCounts: { min: number; max: number }[] = [
-        { min: 4, max: 9 },
-        { min: 10, max: 14 },
-        { min: 16, max: 20 },
-    ];
+    public static readonly scatterWeight: number[] = [90, 8, 2];
+    public static readonly scatterCounts: number[] = [4, 5, 6];
 }
 
 export default Config;

@@ -36,4 +36,6 @@ export default new mongoose.Schema<Round>({
     promotionId: { type: String },
     appType: { type: Number },
     freeSpinId: { type: Number },
+    rootFreeSpinRoundId: { type: Number, required: false },
+    buyFreeSpin: { type: Boolean, default: false },
 });
