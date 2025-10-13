@@ -832,7 +832,7 @@ describe("freeSpinsConsumer", () => {
             };
 
             // Act
-            const result = consumer.getTotalAvaiableFreeSpins(player);
+            const result = consumer.getTotalAvailableFreeSpins(player);
 
             // Assert
             expect(result).toBe(5); // 3 + 2 + 0 + 1 (all available spins count)
