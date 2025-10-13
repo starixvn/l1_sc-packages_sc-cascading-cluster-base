@@ -44,7 +44,8 @@ export default class FreeSpinStateConsumer {
         );
 
         this.gameData.ingame[player.profile.name].freeSpinState = newRoundRecord;
-        this.gameData.ingame[player.profile.name].freeSpinTotalWin += totalWin;
+        const { freeSpinTotalWin } = this.gameData.ingame[player.profile.name];
+        this.gameData.ingame[player.profile.name].freeSpinTotalWin = freeSpinTotalWin ?? 0 + totalWin;
     }
 
     async initFreeSpinState(player, totalWin) {

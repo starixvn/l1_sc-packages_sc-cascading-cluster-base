@@ -118,6 +118,8 @@ export default class BoardGenerator {
 
     generateScatterBoardsRandom(result: Result): Result {
         const numberOfScatterRandom = this.chance.integer({ min: this.minScatter, max: this.maxScatter });
+        result.gridMultipliers = this.initializeGridMultiplier();
+        result.featureQueue = [];
         return this.generateScatterBoards(result, numberOfScatterRandom);
     }
 }
