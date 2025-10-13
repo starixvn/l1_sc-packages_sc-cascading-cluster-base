@@ -827,7 +827,7 @@ describe("freeSpinsConsumer", () => {
             const result = consumer.getTotalAvaiableFreeSpins(player);
 
             // Assert
-            expect(result).toBe(6); // 3 + 2 + 0 + 1 (all available spins count)
+            expect(result).toBe(5); // 3 + 2 + 0 + 1 (all available spins count)
         });
 
         it("should return 0 if player has no free spins", () => {

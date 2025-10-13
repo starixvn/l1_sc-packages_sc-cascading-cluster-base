@@ -170,4 +170,31 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
 
         return freeSpinsOfPlayer.find((freeSpin: FreeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin);
     }
+
+    getTotalAvaiableFreeSpins(player: Player) {
+        const { freeSpins } = this.gameData.ingame[player.profile.name] ?? ({} as { freeSpins: FreeSpin[] });
+
+        return (
+            freeSpins?.reduce((total: number, freeSpin: FreeSpin) => {
+                if (freeSpin.reachMaxWin === false) {
+                    return total + freeSpin.available;
+                }
+                return total;
+            }, 0) ?? 0
+        );
+    }
+
+    getTotalPromotionAvaiableFreeSpins(player: Player) {
+        const { freeSpins } = this.gameData.ingame[player.profile.name] ?? ({} as { freeSpins: FreeSpin[] });
+
+        return (
+            freeSpins?.reduce((total: number, freeSpin: FreeSpin) => {
+                // Only count free spins that have a promotionId
+                if (freeSpin.promotionId && freeSpin.reachMaxWin === false) {
+                    return total + freeSpin.available;
+                }
+                return total;
+            }, 0) ?? 0
+        );
+    }
 }
