@@ -37,7 +37,6 @@ export default class FreeSpinStateConsumer {
                     ended: false,
                     time: new Date(),
                     totalWin,
-                    rounds: [newRoundRecord],
                     ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
                 },
             },
@@ -45,6 +44,7 @@ export default class FreeSpinStateConsumer {
         );
 
         this.gameData.ingame[player.profile.name].freeSpinState = newRoundRecord;
+        this.gameData.ingame[player.profile.name].freeSpinTotalWin += totalWin;
     }
 
     async initFreeSpinState(player, totalWin) {

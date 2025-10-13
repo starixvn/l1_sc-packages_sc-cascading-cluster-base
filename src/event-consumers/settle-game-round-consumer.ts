@@ -209,7 +209,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
         if (!round.freeSpin && settlementResult.freeSpins?.odds > 0) {
             await this.freeSpinStateConsumer.updateFreeSpinState(player, {
-                roundId: round.id,
+                roundId: id,
                 currentStage: spinResult.currentStage,
                 reelMultipliers: spinResult.gridMultipliers,
                 stageQueue: spinResult.featureQueue,
