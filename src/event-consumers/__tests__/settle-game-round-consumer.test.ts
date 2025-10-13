@@ -470,9 +470,9 @@ describe("SettleGameRoundConsumer", () => {
             );
         });
 
-        it("should update free spin state for free spin round", async () => {
+        it("should update free spin state for round has free spin", async () => {
             // Arrange
-            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: true });
+            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false });
             round.settlementResult.freeSpins.odds = 5;
             const spinResult = {
                 currentStage: 1,

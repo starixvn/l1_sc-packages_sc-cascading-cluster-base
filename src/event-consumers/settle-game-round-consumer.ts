@@ -193,7 +193,6 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
     async processFreeSpins(player, round, spinResult) {
         const { id, settlementResult } = round;
         if (settlementResult.freeSpins?.odds > 0) {
-            //should init accumulateWin and rageMeter
             await this.freeSpinsConsumer.gainFreeSpin(
                 player,
                 {
@@ -203,13 +202,12 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     betLevel: round.betLevel,
                     betMultiplier: round.betMultiplier,
                     numberOfFreeSpins: settlementResult.freeSpins.odds,
-                    //accumulateWin and rageMeter
                 },
                 this.definition.freeSpinLiveSeconds
             );
         }
 
-        if (round.freeSpin && settlementResult.freeSpins?.odds > 0) {
+        if (!round.freeSpin && settlementResult.freeSpins?.odds > 0) {
             await this.freeSpinStateConsumer.updateFreeSpinState(player, {
                 roundId: round.id,
                 currentStage: spinResult.currentStage,
