@@ -499,7 +499,7 @@ describe("SettleGameRoundConsumer", () => {
             // Arrange
             const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false });
             round.settlementResult.freeSpins.odds = 0;
-            freeSpinsConsumer.getTotalAvaiableFreeSpins.mockReturnValue(0);
+            freeSpinsConsumer.getTotalAvailableFreeSpins.mockReturnValue(0);
 
             // Act
             await consumer.processFreeSpins(player, round, {});

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import CascadingClusterGameData from "../game-data";
-import { FreeRoundState, FreeSpinState } from "../models/interfaces";
+import { FreeRoundState, FreeSpinState, Player } from "../models/interfaces";
 import FreeSpinsConsumer from "./free-spins-consumer";
 
 export default class FreeSpinStateConsumer {
@@ -90,8 +90,8 @@ export default class FreeSpinStateConsumer {
         }
     }
 
-    resetFreeSpinState(player) {
-        this.gameData.ingame[player.profile.name].freeSpinState = null;
-        this.gameData.ingame[player.profile.name].freeSpinTotalWin = 0;
+    resetFreeSpinState(playerName: string) {
+        this.gameData.ingame[playerName].freeSpinState = null;
+        this.gameData.ingame[playerName].freeSpinTotalWin = 0;
     }
 }

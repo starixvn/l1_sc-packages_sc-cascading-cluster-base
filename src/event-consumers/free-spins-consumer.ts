@@ -171,7 +171,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         return freeSpinsOfPlayer.find((freeSpin: FreeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin);
     }
 
-    getTotalAvaiableFreeSpins(player: Player) {
+    getTotalAvailableFreeSpins(player: Player) {
         const { freeSpins } = this.gameData.ingame[player.profile.name] ?? ({} as { freeSpins: FreeSpin[] });
 
         return (

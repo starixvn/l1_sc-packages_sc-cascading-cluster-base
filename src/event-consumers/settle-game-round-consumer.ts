@@ -218,7 +218,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             });
         }
 
-        let totalAvailableFreeSpins = this.freeSpinsConsumer.getTotalAvaiableFreeSpins(player);
+        let totalAvailableFreeSpins = this.freeSpinsConsumer.getTotalAvailableFreeSpins(player);
 
         if (round.promotionId) {
             totalAvailableFreeSpins += player.promotion?.remainingBonusItems ?? 0;

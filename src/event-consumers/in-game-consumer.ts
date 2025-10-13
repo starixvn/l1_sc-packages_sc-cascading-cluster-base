@@ -1,8 +1,10 @@
 import { EventConsumers } from "sc-slot-game-base";
 import CascadingClusterGameData from "../game-data";
+import FreeSpinsConsumer from "./free-spins-consumer";
 
 export default class InGameConsumer extends EventConsumers.InGameConsumer {
     declare gameData: CascadingClusterGameData;
+    declare freeSpinsConsumer: FreeSpinsConsumer;
 
     private readonly promotionApiClient: any;
 
@@ -126,7 +128,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
     }
 
     getAvailableFreeSpins(realPlayer: any): any {
-        const totalOfFreeSpins = this.freeSpinsConsumer.getTotalAvaiableFreeSpins(realPlayer);
+        const totalOfFreeSpins = this.freeSpinsConsumer.getTotalAvailableFreeSpins(realPlayer);
         const soonestExpiredFreeSpin = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(realPlayer);
         // TODO: get buyFreeSpins
         const buyFreeSpins = false;
