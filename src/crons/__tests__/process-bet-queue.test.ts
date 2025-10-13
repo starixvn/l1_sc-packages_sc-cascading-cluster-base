@@ -127,7 +127,6 @@ describe("cascadingProcessBetQueue", () => {
                 freeBet: bet.freeBet,
                 time: mockDate,
                 freeSpin: bet.freeSpin,
-                freeSpinId: null,
                 betLevel: bet.betLevel,
                 coinValue: bet.coinValue,
                 betMultiplier: bet.betMultiplier,

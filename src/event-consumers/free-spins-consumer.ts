@@ -103,7 +103,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         );
     }
 
-    async gainFreeSpin(player, { roundId, totalAmount, betLevel, coinValue, numberOfFreeSpins, reachMaxWin }: any, timeToLive) {
+    async gainFreeSpin(player, { roundId, totalAmount, betLevel, coinValue, numberOfFreeSpins, reachMaxWin, rootFreeSpinRoundId }: any, timeToLive) {
         const createdTime = new Date();
         const expiryTime = new Date(createdTime.getTime()).setSeconds(createdTime.getSeconds() + timeToLive);
         const memberName = player.profile.name;
@@ -122,6 +122,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
             coinValue,
             reachMaxWin,
             betMultiplier: this.gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
+            rootFreeSpinRoundId,
             expiryTime: player.usePromotion ? player.promotion.endDate : expiryTime,
             ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
         };
@@ -183,6 +184,17 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
                 return total;
             }, 0) ?? 0
         );
+    }
+
+    async useFreeSpin(player: Player) {
+        const firstAvailableFreeSpinSet = this.getSoonestExpiredFreeSpinSet(player);
+
+        if (firstAvailableFreeSpinSet) {
+            await this.freeSpinsRepository.updateOne({ id: firstAvailableFreeSpinSet.id }, { $inc: { available: -1 } });
+            firstAvailableFreeSpinSet.available--;
+        }
+
+        return firstAvailableFreeSpinSet;
     }
 
     getTotalPromotionAvaiableFreeSpins(player: Player) {

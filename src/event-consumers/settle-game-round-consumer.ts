@@ -1,4 +1,4 @@
-import { round as mathRound } from "mathjs";
+import { round as mathRound, round } from "mathjs";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
 import { EventPublishers, SlotGameDefinition } from "sc-slot-game-base";
@@ -191,7 +191,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         return count;
     }
     async processFreeSpins(player, round, spinResult) {
-        const { id, settlementResult } = round;
+        const { id, settlementResult, rootFreeSpinRoundId } = round;
         if (settlementResult.freeSpins?.odds > 0) {
             await this.freeSpinsConsumer.gainFreeSpin(
                 player,
@@ -203,6 +203,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     betMultiplier: round.betMultiplier,
                     numberOfFreeSpins: settlementResult.freeSpins.odds,
                     reachMaxWin: round.reachMaxWin,
+                    rootFreeSpinRoundId: rootFreeSpinRoundId ?? id,
                 },
                 this.definition.freeSpinLiveSeconds
             );
