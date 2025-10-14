@@ -98,9 +98,9 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         const maxWinPerRound = this.getMaxWin(round, freeSpinTotalWin);
         const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
         if (resultFromAdmin) {
-            this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
+            const newResult = this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
             delete this.gameData.settlementResultFromAdmin[player.profile.name];
-            return null;
+            return newResult;
         }
 
         if (round.freeSpin) {
@@ -155,7 +155,8 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         let totalWin = 0;
         const baseBet = round.betLevel * round.coinValue;
         const { tumbles } = resultFromAdmin;
-        const { odds, freeSpins } = this.gameData.gameConfigs.cascadingClusterConfig;
+        const { odds, freeSpins, tileMultiplier } = this.gameData.gameConfigs.cascadingClusterConfig;
+        const rageQueue = [];
 
         for (const tumble of tumbles) {
             if (tumble.symbols) {
@@ -168,15 +169,26 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 tumble.win = winEachTumble * baseBet;
                 totalWin += tumble.win;
             }
+            if (tumble.triggeredStage) {
+                rageQueue.push(tumble.triggeredStage);
+            }
         }
+        const result = new NgResult();
         const lastTumble = tumbles[tumbles.length - 1];
         const freeSpinCount = this.countOccurrences(lastTumble.reels, Config.scatterSymbol);
         const freeSpinOdds = freeSpins.initialOdds.filter((x) => freeSpinCount >= x.count).map((x) => x.odds);
         const freeSpinsResult = { count: freeSpinCount, odds: Math.max(0, ...freeSpinOdds) };
+        result.gridMultipliers =
+            lastTumble?.reelMultipliers?.map((reel: number[]) => reel.map((multi) => multi / tileMultiplier.step)) ??
+            this.boardGenerator.initializeGridMultiplier();
+        result.rageCounter = lastTumble?.rageMeter ?? 0;
+        result.featureQueue = rageQueue;
+        result.currentStage = rageQueue.length > 0 ? rageQueue[rageQueue.length - 1] : 0;
         round.settlementResult = { tumbles, freeSpins: freeSpinsResult };
         round.betWin = Math.min(totalWin, maxWinPerRound);
         round.reachMaxWin = totalWin >= maxWinPerRound;
         round.actualBetwin = totalWin;
+        return result;
     }
 
     countOccurrences(arr, target) {
