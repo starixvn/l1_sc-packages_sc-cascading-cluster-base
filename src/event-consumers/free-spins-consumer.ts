@@ -1,7 +1,7 @@
+import mongoose from "mongoose";
 import { EventConsumers } from "sc-slot-game-base";
 import CascadingClusterGameData from "../game-data.js";
-import { Round, FreeSpin, Player } from "../models/interfaces";
-import mongoose from "mongoose";
+import { FreeSpin, Player, Round } from "../models/interfaces";
 
 export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer {
     declare gameData: CascadingClusterGameData;
@@ -212,7 +212,6 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
 
         return (
             freeSpins?.reduce((total: number, freeSpin: FreeSpin) => {
-                // Only count free spins that have a promotionId
                 if (freeSpin.promotionId && freeSpin.reachMaxWin === false) {
                     return total + freeSpin.available;
                 }

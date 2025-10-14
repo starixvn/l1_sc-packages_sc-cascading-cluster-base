@@ -1,12 +1,13 @@
 import { round } from "mathjs";
-import { Core } from "sc-game-base";
+import { Crons } from "sc-slot-game-base";
 import CascadingClusterGameData from "../game-data";
-import { helpers } from "sc-common";
 import SettleGameRoundConsumer from "../event-consumers/settle-game-round-consumer";
+import { helpers } from "sc-common";
 
-export default class CascadingProcessBetQueue extends Core.Crons.ProcessBetQueue {
+export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
     declare gameData: CascadingClusterGameData;
     declare settleGameRoundConsumer: SettleGameRoundConsumer;
+
     async generateBetInfo(payload, freeSpinInfo) {
         //Review contribution rate
         const betInfo = { ...payload };
@@ -50,31 +51,7 @@ export default class CascadingProcessBetQueue extends Core.Crons.ProcessBetQueue
             this.placeBetPublisher.publishGameFailedBet(player.UID, { endBet: -1, notice: { errorCode: helpers.noticeHelper.invalidBet } });
             return;
         }
-
-        if (this.gameData.ingame[player.profile.name]?.finish) {
-            this.placeBetPublisher.publishGameFailedBet(player.UID, { endBet: -1, notice: { errorCode: helpers.noticeHelper.cannotPlaceBet } });
-
-            return;
-        }
-
-        const soonestExpiredFreeSpinSet = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(player);
-
-        payload.freeSpin = this.validateFreeSpinEligibility(soonestExpiredFreeSpinSet, player, payload.freeSpin);
-        if (this.hasValidPromotion(player)) {
-            player.promotion.freeSpinAvailable = this.freeSpinsConsumer.getTotalPromotionAvaiableFreeSpins(player);
-        }
-
-        if (payload.freeSpin && !this.hasValidFreeSpinSource(soonestExpiredFreeSpinSet, player)) {
-            if (!payload.autoSettle) {
-                this.handleInvalidFreeSpin(player);
-            }
-            return;
-        }
-
-        this.gameData.roundId = await this.idCountersConsumer.consume("round");
-        const betInfo = await this.generateBetInfo(payload, soonestExpiredFreeSpinSet);
-
-        await super.proceedBet(player, betInfo);
+        await super.proceedBet(player, payload);
     }
 
     async upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpin, applicableInterceptors) {
