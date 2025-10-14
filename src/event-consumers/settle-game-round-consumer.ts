@@ -124,7 +124,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         const buyFreeSpinMode = typeof buyFreeSpin === "number" ? buyFreeSpin : 0;
 
         return this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
-            if (buyFreeSpinMode !== 1) {
+            if (buyFreeSpinMode !== 0) {
                 return this.boardGenerator.generateScatterBoardsRandom(result);
             }
             return this.boardGenerator.generateBaseGameBoard(result);
