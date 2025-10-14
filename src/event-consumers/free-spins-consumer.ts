@@ -133,6 +133,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
             reachMaxWin,
             betMultiplier: this.gameData.gameConfigs.cascadingClusterConfig.betMultiplier,
             rootFreeSpinRoundId,
+            buyFreeSpin,
             expiryTime: player.usePromotion ? player.promotion.endDate : expiryTime,
             ...(player.usePromotion && { promotionId: player.promotion.promotionId }),
         };
