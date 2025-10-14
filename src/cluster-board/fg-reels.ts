@@ -1,7 +1,6 @@
 class FgReels {
     public static readonly reelsIndex: number[] = [0, 1, 2];
     public static readonly weight: number[] = [1000, 1000, 1562];
-    public static readonly weightSum: number = FgReels.sumArray(FgReels.weight);
     public static readonly reels: number[][][] = [
         [
             [
@@ -131,14 +130,6 @@ class FgReels {
             ],
         ],
     ];
-
-    private static sumArray(weight: number[]): number {
-        let total = 0;
-        for (const v of weight) {
-            total += v;
-        }
-        return total;
-    }
 }
 
 export default FgReels;

@@ -1,7 +1,6 @@
 class NgReels {
     public static readonly reelsIndex: number[] = [0, 1, 2];
     public static readonly weight: number[] = [32, 11, 60];
-    public static readonly weightSum: number = NgReels.sumArray(NgReels.weight);
     public static readonly reels: number[][][] = [
         [
             // NG 1
@@ -134,14 +133,6 @@ class NgReels {
             ],
         ],
     ];
-
-    private static sumArray(weight: number[]): number {
-        let total = 0;
-        for (const v of weight) {
-            total += v;
-        }
-        return total;
-    }
 }
 
 export default NgReels;
