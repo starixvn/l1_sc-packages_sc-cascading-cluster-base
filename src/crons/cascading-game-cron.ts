@@ -15,6 +15,7 @@ export default class CascadingGameCron extends Crons.SlotGameCron {
     declare boardGenerator: CascadingBoardGenerator;
     declare gameData: CascadingClusterGameData;
     declare definition: CascadingClusterGameDefinition;
+    declare freeSpinsConsumer: FreeSpinsConsumer;
 
     constructor({
         definition,

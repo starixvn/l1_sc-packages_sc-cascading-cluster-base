@@ -43,7 +43,8 @@ describe("freeSpinsConsumer", () => {
             freeSpinsRepository as any,
             idCountersConsumer,
             gameManagementApiClientFactory,
-            roundsRepository
+            roundsRepository,
+            userSessionsRepository
         );
         consumer.roundsRepository = roundsRepository;
         consumer.userSessionsRepository = userSessionsRepository;

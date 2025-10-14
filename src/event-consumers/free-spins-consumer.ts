@@ -9,9 +9,10 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
     declare userSessionsRepository: mongoose.Model<any>;
     declare freeSpinsRepository: mongoose.Model<FreeSpin>;
 
-    constructor(gameId, gameData, freeSpinsRepository, idCountersConsumer, gameManagementApiClientFactory, roundsRepository) {
+    constructor(gameId, gameData, freeSpinsRepository, idCountersConsumer, gameManagementApiClientFactory, roundsRepository, userSessionsRepository) {
         super(gameId, gameData, freeSpinsRepository, idCountersConsumer, gameManagementApiClientFactory);
         this.roundsRepository = roundsRepository;
+        this.userSessionsRepository = userSessionsRepository;
     }
 
     async reload() {
