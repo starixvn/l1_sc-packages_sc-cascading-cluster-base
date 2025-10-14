@@ -14,6 +14,6 @@ export interface FreeSpin {
     betMultiplier: number;
     promotionId: string;
     reachMaxWin: boolean;
-    buyFreeSpin: boolean;
     rootFreeSpinRoundId?: number;
+    buyFreeSpin: number;
 }

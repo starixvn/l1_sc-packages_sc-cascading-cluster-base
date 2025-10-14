@@ -2,11 +2,13 @@ import { round } from "mathjs";
 import { Crons } from "sc-slot-game-base";
 import CascadingClusterGameData from "../game-data";
 import { helpers } from "sc-common";
+import SettleGameRoundConsumer from "../event-consumers/settle-game-round-consumer";
 
 export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
     declare gameData: CascadingClusterGameData;
+    declare settleGameRoundConsumer: SettleGameRoundConsumer;
     async generateBetInfo(payload, freeSpinInfo) {
-        // TODO: Review contribution rate
+        //Review contribution rate
         const betInfo = { ...payload };
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
@@ -19,10 +21,10 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             betInfo.coinValue = coinValue;
             betInfo.betMultiplier = betMultiplier;
         }
-
+        const buyFreeSpinConfig = [50, 100];
         let buyFreeSpinMultiplier = 1;
-        if (payload.buyFreeSpin) {
-            buyFreeSpinMultiplier = 50;
+        if (payload.buyFreeSpin !== 0 && typeof payload.buyFreeSpin === "number") {
+            buyFreeSpinMultiplier = buyFreeSpinConfig[payload.buyFreeSpin - 1];
         }
 
         betInfo.totalAmount = round(betInfo.betLevel * betInfo.coinValue * betInfo.betMultiplier * buyFreeSpinMultiplier, 2);
@@ -31,7 +33,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     }
 
     isValidBuyFreeSpin(player) {
-        // TODO: should check buyFreeSpin enabled
+        //should check buyFreeSpin enabled
         return !this.freeSpinsConsumer.hasFreeSpin(player) && !this.isInPromotionPeriod(player);
     }
 
@@ -78,7 +80,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     async upsertBetWithFreeSpinInfo(player, roundId, bet, rate, freeSpin, applicableInterceptors) {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
-        const { id, buyFreeSpin, fromBuyFreeSpin } = freeSpin ?? {};
+        const { id } = freeSpin ?? {};
 
         let newBet: any = {
             id: roundId,

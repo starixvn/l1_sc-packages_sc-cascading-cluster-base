@@ -109,7 +109,11 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         );
     }
 
-    async gainFreeSpin(player, { roundId, totalAmount, betLevel, coinValue, numberOfFreeSpins, reachMaxWin, rootFreeSpinRoundId }: any, timeToLive) {
+    async gainFreeSpin(
+        player,
+        { roundId, totalAmount, betLevel, coinValue, numberOfFreeSpins, reachMaxWin, rootFreeSpinRoundId, buyFreeSpin }: any,
+        timeToLive
+    ) {
         const createdTime = new Date();
         const expiryTime = new Date(createdTime.getTime()).setSeconds(createdTime.getSeconds() + timeToLive);
         const memberName = player.profile.name;

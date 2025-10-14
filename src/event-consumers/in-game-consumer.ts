@@ -62,7 +62,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             rageMeters,
         };
 
-        // TODO: get is features enabled from database
+        //get is features enabled from database
         const features = this.getFeatures(true);
         const freeSpins = this.getAvailableFreeSpins(realPlayer);
 
@@ -75,7 +75,8 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             features,
             gameConfigs,
             freeSpins,
-            totalMultiplier: this.gameData.ingame[realPlayer.profile.name]?.totalMultiplier ?? 0,
+            freeSpinTotalWin: this.gameData.ingame[realPlayer.profile.name]?.freeSpinTotalWin ?? 0,
+            freeSpinState: this.gameData.ingame[realPlayer.profile.name]?.freeSpinState ?? null,
             user: {
                 ...user,
                 rate,
@@ -130,12 +131,7 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
     getAvailableFreeSpins(realPlayer: any): any {
         const totalOfFreeSpins = this.freeSpinsConsumer.getTotalAvailableFreeSpins(realPlayer);
         const soonestExpiredFreeSpin = this.freeSpinsConsumer.getSoonestExpiredFreeSpinSet(realPlayer);
-        // TODO: get buyFreeSpins
-        const buyFreeSpins = false;
-        // TODO: get multiplier
-        const multiplier = [];
-        // TODO: get rageMeterPoint
-        const rageMeterPoint = 0;
+        const buyFreeSpins = soonestExpiredFreeSpin?.buyFreeSpin;
 
         return {
             total: totalOfFreeSpins,
@@ -144,8 +140,6 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             betMultiplier: soonestExpiredFreeSpin?.betMultiplier,
             promotionId: soonestExpiredFreeSpin?.promotionId,
             buyFreeSpins,
-            multiplier,
-            rageMeterPoint,
         };
     }
 

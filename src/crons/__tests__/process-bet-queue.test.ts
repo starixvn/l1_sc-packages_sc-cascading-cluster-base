@@ -81,9 +81,9 @@ describe("cascadingProcessBetQueue", () => {
                 });
             });
 
-            it("should apply buyFreeSpin multiplier when buyFreeSpin is true", async () => {
+            it("should apply buyFreeSpin multiplier when buyFreeSpin is 1", async () => {
                 // Arrange
-                const payloadWithBuyFreeSpin = { ...payload, buyFreeSpin: true };
+                const payloadWithBuyFreeSpin = { ...payload, buyFreeSpin: 1 };
 
                 // Act
                 const actualResult = await consumer.generateBetInfo(payloadWithBuyFreeSpin, undefined, player);

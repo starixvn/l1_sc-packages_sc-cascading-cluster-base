@@ -7,13 +7,11 @@ export default new mongoose.Schema<Round>({
     siteId: { type: String },
     siteName: { type: String },
     uid: { type: String },
-
     coinValue: { type: Number, default: 0 },
     betLevel: { type: Number, default: 0 },
     betMultiplier: { type: Number, default: 0 },
     totalAmount: { type: Number, default: 0 },
     freeSpin: { type: Boolean, default: false },
-    //Should add freespinId to keep freespin if it create from freespin
     reachMaxWin: { type: Boolean, default: false },
 
     settlementResult: { type: Object },
@@ -37,5 +35,6 @@ export default new mongoose.Schema<Round>({
     appType: { type: Number },
     freeSpinId: { type: Number },
     rootFreeSpinRoundId: { type: Number, required: false },
-    buyFreeSpin: { type: Boolean, default: false },
+    actualBetWin: { type: Number, required: false },
+    buyFreeSpin: { type: Number, default: 0 },
 });

@@ -186,7 +186,7 @@ export default class RoundCalculator {
         round.settlementResult = { tumbles: result.tumbles, freeSpins: result.freeSpins };
         round.reachMaxWin = result.winScore >= maxWinPerRound;
         round.betWin = Math.min(result.winScore, maxWinPerRound);
-        round.actualBetwin = result.winScore;
+        round.actualBetWin = result.winScore;
     }
 
     private recordTumble(params: {

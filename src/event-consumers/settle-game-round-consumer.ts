@@ -51,7 +51,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         this.boardGenerator = boardGenerator;
     }
 
-    async settlePlayerRound(player: any, roundId: number, buyFreeSpin: boolean) {
+    async settlePlayerRound(player: any, roundId: number, buyFreeSpin: number) {
         const round = await this.queryRound(roundId);
 
         if (round) {
@@ -92,38 +92,41 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
     }
 
-    async processSpinning(player, round: Round, buyFreeSpin: boolean) {
-        // if freespin round, get accumulateWin from ingame (in DB will get from accumulateWin from freespincollection) to compare with maxWin config
+    async processSpinning(player, round: Round, buyFreeSpin: number) {
         const { result, freeSpinTotalWin } = this.getAccumulateSpinData(player);
         const maxWinPerRound = this.getMaxWin(round, freeSpinTotalWin);
         const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
+        let newResult = null;
         if (resultFromAdmin) {
-            const newResult = this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
+            newResult = this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
             delete this.gameData.settlementResultFromAdmin[player.profile.name];
+        }
+
+        if (round.freeSpin && newResult === null) {
+            newResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, result, (result) => {
+                return this.boardGenerator.generateFreeSpinBoard(result, false);
+            });
+        }
+
+        if (round.freeSpin && newResult !== null) {
+            await this.freeSpinStateConsumer.updateFreeSpinState(player, {
+                roundId: round.id,
+                currentStage: newResult.currentStage,
+                reelMultipliers: newResult.gridMultipliers,
+                stageQueue: newResult.featureQueue,
+                rageMeter: newResult.rageCounter,
+                totalWin: round.betWin,
+            });
+
             return newResult;
         }
 
-        if (round.freeSpin) {
-            const spinResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, result, (result) => {
-                return this.boardGenerator.generateFreeSpinBoard(result, false);
-            });
-            await this.freeSpinStateConsumer.updateFreeSpinState(player, {
-                roundId: round.id,
-                currentStage: spinResult.currentStage,
-                reelMultipliers: spinResult.gridMultipliers,
-                stageQueue: spinResult.featureQueue,
-                rageMeter: spinResult.rageCounter,
-                totalWin: round.betWin,
-            });
-            return spinResult;
-        } else {
-            return this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
-                if (buyFreeSpin) {
-                    return this.boardGenerator.generateScatterBoardsRandom(result);
-                }
-                return this.boardGenerator.generateBaseGameBoard(result);
-            });
-        }
+        return this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
+            if (buyFreeSpin != 0) {
+                return this.boardGenerator.generateScatterBoardsRandom(result);
+            }
+            return this.boardGenerator.generateBaseGameBoard(result);
+        });
     }
 
     getAccumulateSpinData(player: Player): { result: Result; freeSpinTotalWin: number } {
@@ -216,6 +219,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                     numberOfFreeSpins: settlementResult.freeSpins.odds,
                     reachMaxWin: round.reachMaxWin,
                     rootFreeSpinRoundId: rootFreeSpinRoundId ?? id,
+                    buyFreeSpin: round.buyFreeSpin,
                 },
                 this.definition.freeSpinLiveSeconds
             );

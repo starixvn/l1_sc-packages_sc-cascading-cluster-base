@@ -4,7 +4,6 @@ export interface Round {
     siteId: string;
     siteName: string;
     uid: string;
-
     coinValue: number;
     betLevel: number;
     betMultiplier: number;
@@ -13,7 +12,7 @@ export interface Round {
     reachMaxWin: boolean;
     freeSpinId?: number;
     rootFreeSpinRoundId?: number;
-    buyFreeSpin: boolean;
+    buyFreeSpin: number;
     result: string;
     settlementResult: any;
 
@@ -34,4 +33,5 @@ export interface Round {
     sessionId: string;
     promotionId: string;
     appType: number;
+    actualBetWin?: number;
 }
