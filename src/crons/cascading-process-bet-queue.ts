@@ -1,10 +1,10 @@
 import { round } from "mathjs";
-import { Crons } from "sc-slot-game-base";
+import { Core } from "sc-game-base";
 import CascadingClusterGameData from "../game-data";
 import { helpers } from "sc-common";
 import SettleGameRoundConsumer from "../event-consumers/settle-game-round-consumer";
 
-export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue {
+export default class CascadingProcessBetQueue extends Core.Crons.ProcessBetQueue {
     declare gameData: CascadingClusterGameData;
     declare settleGameRoundConsumer: SettleGameRoundConsumer;
     async generateBetInfo(payload, freeSpinInfo) {
