@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import CascadingClusterGameData from "../game-data";
-import { FreeRoundState, FreeSpinState, Player } from "../models/interfaces";
+import { FreeRoundState, FreeSpinState } from "../models/interfaces";
 import FreeSpinsConsumer from "./free-spins-consumer";
 
 export default class FreeSpinStateConsumer {

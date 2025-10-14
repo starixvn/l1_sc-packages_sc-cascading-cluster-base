@@ -1,14 +1,14 @@
-import { round as mathRound, round } from "mathjs";
+import { round as mathRound } from "mathjs";
 import mongoose from "mongoose";
 import { Core } from "sc-game-base";
 import { EventPublishers, SlotGameDefinition } from "sc-slot-game-base";
+import { BoardGenerator, FgResult, NgResult, Result } from "../cluster-board";
 import Config from "../cluster-board/config";
 import RoundCalculator, { TumbleRecord } from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
 import { Player, Round } from "../models/interfaces";
 import FreeSpinStateConsumer from "./free-spin-state-consumer";
 import FreeSpinsConsumer from "./free-spins-consumer";
-import { BoardGenerator, FgResult, NgResult, Result } from "../cluster-board";
 
 export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
     declare gameData: CascadingClusterGameData;
@@ -121,8 +121,10 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             return newResult;
         }
 
+        const buyFreeSpinMode = typeof buyFreeSpin === "number" ? buyFreeSpin : 0;
+
         return this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
-            if (buyFreeSpin != 0) {
+            if (buyFreeSpinMode !== 1) {
                 return this.boardGenerator.generateScatterBoardsRandom(result);
             }
             return this.boardGenerator.generateBaseGameBoard(result);

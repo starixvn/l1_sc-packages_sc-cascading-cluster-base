@@ -93,7 +93,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
     cacheExpiredFreeSpins(expiredFreeSpins) {
         const freeSpinsGroupedByNames = this.groupFreeSpinsByNames(expiredFreeSpins);
 
-        Object.entries(freeSpinsGroupedByNames).map(([name, loadedFreeSpins]) => {
+        Object.entries(freeSpinsGroupedByNames).forEach(([name, loadedFreeSpins]) => {
             this.initPlayerFreeSpins(name, loadedFreeSpins);
         });
     }
