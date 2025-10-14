@@ -17,6 +17,7 @@ import {
 import { CascadingSlotPromotionInterceptor } from "./event-interceptors";
 import { HistoryQuery } from "./query-apis";
 import HttpRouter from "./routers/cascading-http-router";
+import { UserSessionModel } from "./models";
 
 export default class CascadingSlotContainerRegistry extends SlotContainerRegistry {
     register(appConfigs, definition, gameData) {
@@ -43,6 +44,13 @@ export default class CascadingSlotContainerRegistry extends SlotContainerRegistr
 
         this.container.register({
             httpRouter: asClass(HttpRouter),
+        });
+    }
+
+    registerModels() {
+        super.registerModels();
+        this.container.register({
+            userSessionsRepository: asValue(UserSessionModel),
         });
     }
 

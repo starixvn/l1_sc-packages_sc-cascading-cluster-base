@@ -21,5 +21,5 @@
         "noImplicitThis": false
     },
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.test.ts", "**/__tests__/**/*", "coverage", "types", "dist", "test-types.ts", "**/*.test-data.js"]
+    "exclude": ["node_modules", "**/*.test.ts", "**/__tests__/**/*", "coverage", "types", "dist", "test-types.ts", "**/mock-data-test/**/*"]
 }

@@ -75,7 +75,7 @@ const gameConfigs = {
 const definition = {
     id: 47,
     name: "cascadinggame",
+    freeSpinLiveSeconds: 300,
 };
-
 
 export { gameConfigs, definition };

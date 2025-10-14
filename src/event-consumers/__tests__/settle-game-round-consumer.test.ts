@@ -5,7 +5,7 @@ import GameManagementApiClientFactory from "sc-game-base/src/core/game-managemen
 import RoundCalculator from "../../board/round-calculator";
 import TumbleCalculator from "../../board/tumble-calculator";
 import { BoardGenerator, FgResult } from "../../cluster-board";
-import { definition, gameConfigs } from "../../test-data";
+import { definition, gameConfigs } from "../../mock-data-test/share-data";
 import FreeSpinStateConsumer from "../free-spin-state-consumer";
 import FreeSpinsConsumer from "../free-spins-consumer";
 import SettleGameRoundConsumer from "../settle-game-round-consumer";
@@ -103,7 +103,7 @@ function initRoundDocument({ id = 1, playerId, coinValue, betLevel, betMultiplie
         rate: 1,
         exchangeRateId: 1,
         playerId,
-        odds: gameConfigs.cascadingSlotsConfig,
+        odds: gameConfigs.cascadingClusterConfig,
         betWin: 0,
         freeSpin,
         multiplier: 0,

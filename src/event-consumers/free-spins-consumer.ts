@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer {
     declare gameData: CascadingClusterGameData;
     roundsRepository: mongoose.Model<Round>;
-    declare userSessionsRepository: mongoose.Model<any>;
+    userSessionsRepository: mongoose.Model<any>;
     declare freeSpinsRepository: mongoose.Model<FreeSpin>;
 
     constructor(gameId, gameData, freeSpinsRepository, idCountersConsumer, gameManagementApiClientFactory, roundsRepository, userSessionsRepository) {

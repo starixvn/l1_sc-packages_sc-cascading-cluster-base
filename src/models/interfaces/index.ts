@@ -3,3 +3,4 @@ export * from "./free-spin";
 export * from "./free-spin-state";
 export * from "./round";
 export * from "./player";
+export * from "./user-session";
