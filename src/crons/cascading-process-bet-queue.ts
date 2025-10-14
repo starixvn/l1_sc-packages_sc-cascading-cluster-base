@@ -9,8 +9,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     declare settleGameRoundConsumer: SettleGameRoundConsumer;
 
     async generateBetInfo(payload, freeSpinInfo) {
-        //Review contribution rate
-        const betInfo = { roundId: this.gameData.roundId, ...payload };
+        const betInfo = { ...payload };
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         betInfo.betMultiplier = cascadingClusterConfig.betMultiplier;
@@ -34,7 +33,6 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
     }
 
     isValidBuyFreeSpin(player) {
-        //should check buyFreeSpin enabled
         return !this.freeSpinsConsumer.hasFreeSpin(player) && !this.isInPromotionPeriod(player);
     }
 
@@ -51,6 +49,10 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
             this.placeBetPublisher.publishGameFailedBet(player.UID, { endBet: -1, notice: { errorCode: helpers.noticeHelper.invalidBet } });
             return;
         }
+        if (payload.autoSettle) {
+            payload.roundId = this.gameData.roundId;
+        }
+
         await super.proceedBet(player, payload);
     }
 
