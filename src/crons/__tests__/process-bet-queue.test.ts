@@ -60,6 +60,7 @@ describe("cascadingProcessBetQueue", () => {
                 // Assert
                 expect(actualResult).toStrictEqual({
                     freeBet: true,
+                    roundId: gameData.roundId,
                     ...freeSpinInfo,
                     totalAmount: freeSpinInfo.betLevel * freeSpinInfo.coinValue * freeSpinInfo.betMultiplier,
                 });
@@ -76,6 +77,7 @@ describe("cascadingProcessBetQueue", () => {
                 // Assert
                 expect(actualResult).toStrictEqual({
                     ...payload,
+                    roundId: gameData.roundId,
                     betMultiplier: (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier,
                     totalAmount: payload.betLevel * payload.coinValue * (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier,
                 });
@@ -91,6 +93,7 @@ describe("cascadingProcessBetQueue", () => {
                 // Assert
                 expect(actualResult).toStrictEqual({
                     ...payloadWithBuyFreeSpin,
+                    roundId: gameData.roundId,
                     betMultiplier: (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier,
                     totalAmount: payload.betLevel * payload.coinValue * (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier * 50,
                 });

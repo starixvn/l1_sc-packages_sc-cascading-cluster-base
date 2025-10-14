@@ -10,7 +10,7 @@ export default class CascadingProcessBetQueue extends Crons.SlotProcessBetQueue 
 
     async generateBetInfo(payload, freeSpinInfo) {
         //Review contribution rate
-        const betInfo = { ...payload };
+        const betInfo = { roundId: this.gameData.roundId, ...payload };
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
         betInfo.betMultiplier = cascadingClusterConfig.betMultiplier;
