@@ -48,6 +48,10 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         freeSpinsNeedToCache.length > 0 && this.cacheExpiredFreeSpins(freeSpinsNeedToCache);
     }
 
+    hasFreeSpin(player: { profile: { name: string } }) {
+        return this.gameData.ingame[player.profile.name]?.freeSpins?.some((freeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin) ?? false;
+    }
+
     async settleExpiredFreeSpins(expiredFreeSpins) {
         const freeSpinsGroupedByNames = this.groupFreeSpinsByNames(expiredFreeSpins) as Record<string, FreeSpin[]>;
 

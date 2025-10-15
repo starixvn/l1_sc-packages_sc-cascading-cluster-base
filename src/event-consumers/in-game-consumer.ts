@@ -75,7 +75,6 @@ export default class InGameConsumer extends EventConsumers.InGameConsumer {
             features,
             gameConfigs,
             freeSpins,
-            freeSpinTotalWin: this.gameData.ingame[realPlayer.profile.name]?.freeSpinTotalWin ?? 0,
             freeSpinState: this.gameData.ingame[realPlayer.profile.name]?.freeSpinState ?? null,
             user: {
                 ...user,

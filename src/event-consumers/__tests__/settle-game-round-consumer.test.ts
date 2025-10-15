@@ -115,7 +115,7 @@ function initRoundDocument({ id = 1, playerId, coinValue, betLevel, betMultiplie
             tumbles: [] as any[],
             freeSpins: { odds: 0 },
         },
-        actualBetwin: 0,
+        actualBetWin: 0,
         freeSpinId,
         save: jest.fn(),
     };
@@ -136,7 +136,6 @@ describe("SettleGameRoundConsumer", () => {
             roundsRepository.findOne().exec.mockReturnValueOnce(round);
             freeSpinStateConsumer.getCurrentState.mockReturnValue({
                 freeSpinState: null,
-                freeSpinTotalWin: 0,
             });
             roundCalculator.processSpinning.mockReturnValue({
                 currentStage: 1,
@@ -175,7 +174,6 @@ describe("SettleGameRoundConsumer", () => {
             roundsRepository.findOne().exec.mockReturnValueOnce(round);
             freeSpinStateConsumer.getCurrentState.mockReturnValue({
                 freeSpinState: null,
-                freeSpinTotalWin: 0,
             });
             roundCalculator.processSpinning2.mockReturnValue({
                 currentStage: 1,
@@ -198,7 +196,6 @@ describe("SettleGameRoundConsumer", () => {
             roundsRepository.findOne().exec.mockReturnValueOnce(round);
             freeSpinStateConsumer.getCurrentState.mockReturnValue({
                 freeSpinState: { reelMultipliers: [2, 2, 2], currentStage: 1, stageQueue: [], rageMeter: 0 },
-                freeSpinTotalWin: 10,
             });
             const spinResult = {
                 currentStage: 1,
@@ -249,7 +246,6 @@ describe("SettleGameRoundConsumer", () => {
             const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false });
             freeSpinStateConsumer.getCurrentState.mockReturnValue({
                 freeSpinState: null,
-                freeSpinTotalWin: 0,
             });
             boardGenerator.initializeGridMultiplier.mockReturnValue([1, 1, 1]);
             const spinResult = {
@@ -273,7 +269,6 @@ describe("SettleGameRoundConsumer", () => {
             const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: true });
             freeSpinStateConsumer.getCurrentState.mockReturnValue({
                 freeSpinState: { reelMultipliers: [2, 2, 2], currentStage: 1, stageQueue: [], rageMeter: 0 },
-                freeSpinTotalWin: 10,
             });
             const spinResult = {
                 currentStage: 1,
@@ -296,7 +291,6 @@ describe("SettleGameRoundConsumer", () => {
             const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false });
             freeSpinStateConsumer.getCurrentState.mockReturnValue({
                 freeSpinState: null,
-                freeSpinTotalWin: 0,
             });
             boardGenerator.initializeGridMultiplier.mockReturnValue([1, 1, 1]);
             const spinResult = {
@@ -347,11 +341,9 @@ describe("SettleGameRoundConsumer", () => {
                 currentStage: 1,
                 stageQueue: [],
                 rageMeter: 0,
+                remainingMaxWin: 10,
             };
-            freeSpinStateConsumer.getCurrentState.mockReturnValue({
-                freeSpinState,
-                freeSpinTotalWin: 10,
-            });
+            freeSpinStateConsumer.getCurrentState.mockReturnValue(freeSpinState);
 
             // Act
             const result = consumer.getAccumulateSpinData(player);
@@ -360,15 +352,12 @@ describe("SettleGameRoundConsumer", () => {
             expect(result.result).toBeInstanceOf(FgResult);
             expect(result.result.gridMultipliers).toEqual([2, 2, 2]);
             expect(result.result.currentStage).toBe(1);
-            expect(result.freeSpinTotalWin).toBe(10);
+            expect(result.remainingMaxWin).toBe(10);
         });
 
         it("should initialize grid multiplier when no free spin state", () => {
             // Arrange
-            freeSpinStateConsumer.getCurrentState.mockReturnValue({
-                freeSpinState: null,
-                freeSpinTotalWin: 0,
-            });
+            freeSpinStateConsumer.getCurrentState.mockReturnValue(null);
             boardGenerator.initializeGridMultiplier.mockReturnValue([1, 1, 1]);
 
             // Act
@@ -377,7 +366,7 @@ describe("SettleGameRoundConsumer", () => {
             // Assert
             expect(result.result).toBeInstanceOf(FgResult);
             expect(result.result.gridMultipliers).toEqual([1, 1, 1]);
-            expect(result.freeSpinTotalWin).toBe(0);
+            expect(result.remainingMaxWin).toBeUndefined();
         });
     });
 
@@ -388,7 +377,7 @@ describe("SettleGameRoundConsumer", () => {
             gameData.gameConfigs.maxWinPerRound = 100;
 
             // Act
-            const result = consumer.getMaxWin(round as any, 0);
+            const result = consumer.getMaxWin(round as any);
 
             // Assert
             expect(result).toBe(1000); // 100 * 0.1 * 5 * 20 = 1000
@@ -403,7 +392,7 @@ describe("SettleGameRoundConsumer", () => {
             const result = consumer.getMaxWin(round as any, 50);
 
             // Assert
-            expect(result).toBe(950); // 1000 - 50 = 950
+            expect(result).toBe(50); // 1000 - 50 = 950
         });
     });
 
@@ -436,7 +425,7 @@ describe("SettleGameRoundConsumer", () => {
             expect(round.settlementResult.freeSpins).toBeDefined();
             expect(round.betWin).toBeDefined();
             expect(round.reachMaxWin).toBeDefined();
-            expect(round.actualBetwin).toBeDefined();
+            expect(round.actualBetWin).toBeDefined();
         });
     });
 
@@ -480,19 +469,25 @@ describe("SettleGameRoundConsumer", () => {
                 featureQueue: [],
                 rageCounter: 0,
             };
+            gameData.gameConfigs.maxWinPerRound = 1000;
+            round.betWin = 100;
 
             // Act
             await consumer.processFreeSpins(player, round, spinResult);
 
             // Assert
-            expect(freeSpinStateConsumer.updateFreeSpinState).toHaveBeenCalledWith(player, {
-                roundId: round.id,
-                currentStage: 1,
-                reelMultipliers: [2, 2, 2],
-                stageQueue: [],
-                rageMeter: 0,
-                totalWin: round.betWin,
-            });
+            expect(freeSpinStateConsumer.updateFreeSpinState).toHaveBeenCalledWith(
+                player,
+                {
+                    roundId: round.id,
+                    currentStage: 1,
+                    reelMultipliers: [2, 2, 2],
+                    stageQueue: [],
+                    rageMeter: 0,
+                    remainingMaxWin: 9900,
+                },
+                10000
+            );
         });
 
         it("should stop chain when no available free spins", async () => {
@@ -569,7 +564,7 @@ describe("SettleGameRoundConsumer", () => {
     describe("collectRoundResult", () => {
         it("should collect round result correctly", () => {
             // Arrange
-            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false });
+            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false, actualBetWin: 10 });
             round.settlementResult.tumbles = [
                 {
                     symbols: [],
@@ -590,7 +585,7 @@ describe("SettleGameRoundConsumer", () => {
                 totalLost: 0,
                 bigWin: true,
             };
-            freeSpinsConsumer.getTotalAvaiableFreeSpins.mockReturnValue(15);
+            freeSpinsConsumer.getTotalAvailableFreeSpins.mockReturnValue(15);
 
             // Act
             const result = consumer.collectRoundResult(player, round, betResult);
@@ -606,7 +601,7 @@ describe("SettleGameRoundConsumer", () => {
                     tumbles: expect.any(Array),
                     isFreeSpin: round.freeSpin,
                     reachMaxWin: round.reachMaxWin,
-                    actualBetwin: round.actualBetwin,
+                    actualBetWin: round.actualBetWin,
                 },
             });
         });

@@ -828,7 +828,7 @@ describe("freeSpinsConsumer", () => {
         });
     });
 
-    describe("getTotalAvaiableFreeSpins", () => {
+    describe("getTotalAvailableFreeSpins", () => {
         it("should return total available free spins for player", () => {
             // Arrange
             const player = { profile: { name: "player1" } };
@@ -856,7 +856,7 @@ describe("freeSpinsConsumer", () => {
             gameData.ingame = {};
 
             // Act
-            const result = consumer.getTotalAvaiableFreeSpins(player);
+            const result = consumer.getTotalAvailableFreeSpins(player);
 
             // Assert
             expect(result).toBe(0);
@@ -880,10 +880,7 @@ describe("freeSpinsConsumer", () => {
             const result = consumer.hasFreeSpin(player);
 
             // Assert
-            // The method might be checking for available > 0 AND not reachMaxWin
-            // Since this is inherited from base class, let's expect false for now
-            // and document that this needs to be verified with actual base class behavior
-            expect(result).toBe(false);
+            expect(result).toBe(true);
         });
 
         it("should return false if player has no available free spins", () => {
