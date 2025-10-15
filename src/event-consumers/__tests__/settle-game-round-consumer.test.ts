@@ -92,7 +92,16 @@ function initConsumer() {
     });
 }
 
-function initRoundDocument({ id = 1, playerId, coinValue, betLevel, betMultiplier, freeSpin, freeSpinId = undefined }: any) {
+function initRoundDocument({
+    id = 1,
+    playerId,
+    coinValue,
+    betLevel,
+    betMultiplier,
+    freeSpin,
+    freeSpinId = undefined,
+    rootFreeSpinRoundId = undefined,
+}: any) {
     return {
         id,
         coinValue,
@@ -117,6 +126,7 @@ function initRoundDocument({ id = 1, playerId, coinValue, betLevel, betMultiplie
         },
         actualBetWin: 0,
         freeSpinId,
+        rootFreeSpinRoundId,
         save: jest.fn(),
     };
 }
@@ -217,7 +227,14 @@ describe("SettleGameRoundConsumer", () => {
     describe("handleReachMaxWin", () => {
         it("should stop free spin chain when free spin round reaches max win", async () => {
             // Arrange
-            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: true, freeSpinId: 123 });
+            const round = initRoundDocument({
+                playerId: 1,
+                coinValue: 0.1,
+                betLevel: 5,
+                betMultiplier: 20,
+                freeSpin: true,
+                rootFreeSpinRoundId: 123,
+            });
 
             // Act
             await consumer.handleReachMaxWin(player, round as any);
@@ -229,7 +246,14 @@ describe("SettleGameRoundConsumer", () => {
 
         it("should only update free spin when not a free spin round", async () => {
             // Arrange
-            const round = initRoundDocument({ playerId: 1, coinValue: 0.1, betLevel: 5, betMultiplier: 20, freeSpin: false, freeSpinId: 123 });
+            const round = initRoundDocument({
+                playerId: 1,
+                coinValue: 0.1,
+                betLevel: 5,
+                betMultiplier: 20,
+                freeSpin: false,
+                rootFreeSpinRoundId: 123,
+            });
 
             // Act
             await consumer.handleReachMaxWin(player, round as any);
