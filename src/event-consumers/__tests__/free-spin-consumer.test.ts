@@ -11,7 +11,6 @@ describe("freeSpinsConsumer", () => {
 
     const gameData = stubGameData();
 
-    /** @type {mongoose.Model}*/
     const freeSpinsRepository = stubMongoose(mongoose.Model);
     const roundsRepository = stubMongoose(mongoose.Model);
     const userSessionsRepository = stubMongoose(mongoose.Model);
@@ -657,28 +656,31 @@ describe("freeSpinsConsumer", () => {
         it("should update free spin reachMaxWin flag in repository", async () => {
             // Arrange
             const player = { UID: "uid1", profile: { name: "player1" } };
-            const freeSpinId = 123;
+            const rootFreeSpinRoundId = 123;
+            gameData.ingame = {
+                player1: { freeSpins: [{ id: 1, rootFreeSpinRoundId: 123 }] },
+            };
 
             // Act
-            await consumer.updateReachMaxWin(player, freeSpinId);
+            await consumer.updateReachMaxWin(player, rootFreeSpinRoundId);
 
             // Assert
-            expect(freeSpinsRepository.updateOne).toHaveBeenCalledWith({ uid: "uid1", id: 123 }, { reachMaxWin: true });
+            expect(freeSpinsRepository.updateOne).toHaveBeenCalledWith({ id: 1, uid: "uid1" }, { reachMaxWin: true });
         });
 
         it("should set reachMaxWin flag in gameData ingame", async () => {
             // Arrange
             const player = { UID: "uid1", profile: { name: "player1" } };
-            const freeSpinId = 123;
+            const rootFreeSpinRoundId = 123;
             gameData.ingame = {
-                player1: { betQueue: [] },
+                player1: { betQueue: [], freeSpins: [{ id: 1, rootFreeSpinRoundId: 123 }] },
             };
 
             // Act
-            await consumer.updateReachMaxWin(player, freeSpinId);
+            await consumer.updateReachMaxWin(player, rootFreeSpinRoundId);
 
             // Assert
-            expect((gameData.ingame as any).player1.reachMaxWin).toBe(true);
+            expect((gameData.ingame as any).player1.freeSpins[0].reachMaxWin).toBe(true);
         });
     });
 
@@ -939,12 +941,15 @@ describe("freeSpinsConsumer", () => {
         it("should handle database errors in updateReachMaxWin gracefully", async () => {
             // Arrange
             const player = { UID: "uid1", profile: { name: "player1" } };
-            const freeSpinId = 123;
+            const rootFreeSpinRoundId = 123;
+            gameData.ingame = {
+                player1: { freeSpins: [{ id: 1, rootFreeSpinRoundId: 123 }] },
+            };
 
             freeSpinsRepository.updateOne.mockRejectedValueOnce(new Error("Database error"));
 
             // Act & Assert
-            await expect(consumer.updateReachMaxWin(player, freeSpinId)).rejects.toThrow("Database error");
+            await expect(consumer.updateReachMaxWin(player, rootFreeSpinRoundId)).rejects.toThrow("Database error");
         });
 
         it("should handle missing round data in settleExpiredFreeSpins", async () => {

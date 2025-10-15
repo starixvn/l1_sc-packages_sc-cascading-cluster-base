@@ -87,8 +87,8 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             await this.freeSpinStateConsumer.stopChain(player);
         }
 
-        if (round.freeSpinId) {
-            await this.freeSpinsConsumer.updateReachMaxWin(player, round.freeSpinId);
+        if (round.rootFreeSpinRoundId) {
+            await this.freeSpinsConsumer.updateReachMaxWin(player, round.rootFreeSpinRoundId);
         }
     }
 

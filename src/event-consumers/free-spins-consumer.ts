@@ -177,9 +177,13 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
             .exec();
     }
 
-    async updateReachMaxWin(player, freeSpinId: number) {
-        await this.freeSpinsRepository.updateOne({ uid: player.UID, id: freeSpinId }, { reachMaxWin: true });
-        this.gameData.ingame[player.profile.name].reachMaxWin = true;
+    async updateReachMaxWin(player, rootFreeSpinRoundId: number) {
+        const freeSpins = this.gameData.ingame[player.profile.name].freeSpins;
+        const freeSpin = freeSpins.find((freeSpin) => freeSpin.rootFreeSpinRoundId === rootFreeSpinRoundId);
+        if (freeSpin) {
+            freeSpin.reachMaxWin = true;
+            await this.freeSpinsRepository.updateOne({ uid: player.UID, id: freeSpin.id }, { reachMaxWin: true });
+        }
     }
 
     getSoonestExpiredFreeSpinSet(player: Player) {
