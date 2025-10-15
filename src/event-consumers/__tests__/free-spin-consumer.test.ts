@@ -665,7 +665,7 @@ describe("freeSpinsConsumer", () => {
             await consumer.updateReachMaxWin(player, rootFreeSpinRoundId);
 
             // Assert
-            expect(freeSpinsRepository.updateOne).toHaveBeenCalledWith({ id: 1, uid: "uid1" }, { reachMaxWin: true });
+            expect(freeSpinsRepository.updateMany).toHaveBeenCalledWith({ uid: "uid1", id: { $in: [1] } }, { reachMaxWin: true });
         });
 
         it("should set reachMaxWin flag in gameData ingame", async () => {
@@ -681,6 +681,27 @@ describe("freeSpinsConsumer", () => {
 
             // Assert
             expect((gameData.ingame as any).player1.freeSpins[0].reachMaxWin).toBe(true);
+        });
+
+        it("should update all free spins when rootFreeSpinRoundId is the same", async () => {
+            // Arrange
+            const player = { UID: "uid1", profile: { name: "player1" } };
+            const rootFreeSpinRoundId = 123;
+            gameData.ingame = {
+                player1: {
+                    freeSpins: [
+                        { id: 1, rootFreeSpinRoundId: 123 },
+                        { id: 2, rootFreeSpinRoundId: 123 },
+                    ],
+                },
+            };
+
+            // Act
+            await consumer.updateReachMaxWin(player, rootFreeSpinRoundId);
+
+            // Assert
+            expect((gameData.ingame as any).player1.freeSpins[0].reachMaxWin).toBe(true);
+            expect((gameData.ingame as any).player1.freeSpins[1].reachMaxWin).toBe(true);
         });
     });
 
@@ -946,7 +967,7 @@ describe("freeSpinsConsumer", () => {
                 player1: { freeSpins: [{ id: 1, rootFreeSpinRoundId: 123 }] },
             };
 
-            freeSpinsRepository.updateOne.mockRejectedValueOnce(new Error("Database error"));
+            freeSpinsRepository.updateMany.mockRejectedValueOnce(new Error("Database error"));
 
             // Act & Assert
             await expect(consumer.updateReachMaxWin(player, rootFreeSpinRoundId)).rejects.toThrow("Database error");
