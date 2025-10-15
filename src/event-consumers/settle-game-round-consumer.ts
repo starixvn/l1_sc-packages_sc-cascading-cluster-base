@@ -117,7 +117,9 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 rageMeter: newResult.rageCounter,
                 totalWin: round.betWin,
             });
+        }
 
+        if (newResult !== null) {
             return newResult;
         }
 
