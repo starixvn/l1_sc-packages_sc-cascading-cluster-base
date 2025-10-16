@@ -149,7 +149,7 @@ export default class RoundCalculator {
             prizeList.length = 0;
             this.calcPrize(newResult, prizeList);
 
-            while (prizeList.length === 0 && !newResult.isQueueEmpty()) {
+            while (prizeList.length === 0 && !newResult.isQueueEmpty() && newResult.winScore < maxWinPerRound) {
                 const { feature, triggeredPositions } = this.processRageMeter(newResult);
 
                 newResult.tumbles.push(
@@ -177,9 +177,8 @@ export default class RoundCalculator {
     updateFreeSpins(result: Result): void {
         const { cascadingClusterConfig } = this.gameData.gameConfigs;
 
-        result.freeSpins.count = this.countSC(result.reels);
-        const freeSpinOdds = cascadingClusterConfig.freeSpins.initialOdds.filter((x) => result.freeSpins.count >= x.count).map((x) => x.odds);
-        result.freeSpins.odds = Math.max(0, ...freeSpinOdds);
+        result.freeSpins.count = Math.min(this.countSC(result.reels), 6);
+        result.freeSpins.odds = cascadingClusterConfig.freeSpins.initialOdds.find((x) => result.freeSpins.count === x.count)?.odds ?? 0;
     }
 
     updateRound(round, result: Result, maxWinPerRound: number) {
