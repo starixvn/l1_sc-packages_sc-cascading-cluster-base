@@ -1,4 +1,3 @@
 import mongoose from "mongoose";
 import UserSessionSchema from "../schemas/user-session-schema";
-
-export default mongoose.model("UserSessions", UserSessionSchema);
+export default mongoose.models.UserSessions || mongoose.model("UserSessions", UserSessionSchema);
