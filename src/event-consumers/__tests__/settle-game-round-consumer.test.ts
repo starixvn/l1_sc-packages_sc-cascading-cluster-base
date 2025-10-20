@@ -370,7 +370,7 @@ describe("SettleGameRoundConsumer", () => {
             freeSpinStateConsumer.getCurrentState.mockReturnValue(freeSpinState);
 
             // Act
-            const result = consumer.getAccumulateSpinData(player);
+            const result = consumer.getAccumulateSpinData(player as any);
 
             // Assert
             expect(result.result).toBeInstanceOf(FgResult);
@@ -385,7 +385,7 @@ describe("SettleGameRoundConsumer", () => {
             boardGenerator.initializeGridMultiplier.mockReturnValue([1, 1, 1]);
 
             // Act
-            const result = consumer.getAccumulateSpinData(player);
+            const result = consumer.getAccumulateSpinData(player as any);
 
             // Assert
             expect(result.result).toBeInstanceOf(FgResult);
@@ -504,8 +504,8 @@ describe("SettleGameRoundConsumer", () => {
                 player,
                 {
                     roundId: round.id,
-                    currentStage: 1,
-                    reelMultipliers: [2, 2, 2],
+                    currentStage: 0,
+                    reelMultipliers: boardGenerator.initializeGridMultiplier(),
                     stageQueue: [],
                     rageMeter: 0,
                     remainingMaxWin: 9900,

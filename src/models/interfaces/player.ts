@@ -10,5 +10,6 @@ export interface Player {
     };
     session: {
         totalAmount: number;
+        playerId: string;
     };
 }

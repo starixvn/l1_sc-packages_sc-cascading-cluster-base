@@ -238,10 +238,10 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 player,
                 {
                     roundId: id,
-                    currentStage: spinResult.currentStage,
-                    reelMultipliers: spinResult.gridMultipliers,
-                    stageQueue: spinResult.featureQueue,
-                    rageMeter: spinResult.rageCounter,
+                    currentStage: 0,
+                    reelMultipliers: this.boardGenerator.initializeGridMultiplier(),
+                    stageQueue: [],
+                    rageMeter: 0,
                     remainingMaxWin: maxWin - round.betWin,
                 },
                 maxWin
