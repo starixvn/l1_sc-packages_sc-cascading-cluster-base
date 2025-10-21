@@ -115,7 +115,7 @@ export default class BoardGenerator {
     }
 
     generateScatterBoardsRandom(result: Result): Result {
-        const numberOfScatterRandom = this.chance.weighted(Config.scatterCounts, Config.scatterWeight);
+        const numberOfScatterRandom = this.chance.weighted(Config.scatterCounts, Config.scatterWeightForSupper);
         result.gridMultipliers = this.initializeGridMultiplier();
         result.featureQueue = [];
         return this.generateScatterBoards(result, numberOfScatterRandom);

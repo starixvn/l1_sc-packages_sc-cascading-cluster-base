@@ -13,10 +13,11 @@ class Config {
     public static readonly minLinkRequirement: number = 5;
 
     public static readonly phase4replaceSymbol = [0, 1, 2, 3];
-    public static readonly phase4replaceSymbolWeight = [8, 12, 14, 16];
+    public static readonly phase4replaceSymbolWeight = [10, 12, 14, 16];
 
-    public static readonly scatterWeight: number[] = [90, 8, 2];
-    public static readonly scatterCounts: number[] = [4, 5, 6];
+    public static readonly scatterWeightForSupper: number[] = [800, 152, 30, 10];
+    public static readonly scatterWeight: number[] = [72, 21, 5, 2];
+    public static readonly scatterCounts: number[] = [3, 4, 5, 6];
 }
 
 export default Config;
