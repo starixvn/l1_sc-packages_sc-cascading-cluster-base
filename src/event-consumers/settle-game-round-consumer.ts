@@ -51,11 +51,11 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         this.boardGenerator = boardGenerator;
     }
 
-    async settlePlayerRound(player: any, roundId: number, buyFreeSpin: number) {
+    async settlePlayerRound(player: any, roundId: number, buyFreeSpin: number, fromBuyFreeSpin: number) {
         const round = await this.queryRound(roundId);
 
         if (round) {
-            const spinResult = await this.processSpinning(player, round, buyFreeSpin);
+            await this.processSpinning(player, round, buyFreeSpin, fromBuyFreeSpin);
 
             round.paid = true;
             round.endTime = new Date();
@@ -71,7 +71,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
             if (round.reachMaxWin) {
                 await this.handleReachMaxWin(player, round);
             } else {
-                await this.processFreeSpins(player, round, spinResult);
+                await this.processFreeSpins(player, round, buyFreeSpin);
             }
 
             await this.userBetResultPublisher.publishToUser(round.uid, this.collectRoundResult(player, round, betResult));
@@ -92,7 +92,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
     }
 
-    async processSpinning(player, round: Round, buyFreeSpin: number) {
+    async processSpinning(player, round: Round, buyFreeSpin: number, fromBuyFreeSpin: number) {
         const { result, remainingMaxWin } = this.getAccumulateSpinData(player);
         const maxWinPerRound = this.getMaxWin(round, remainingMaxWin);
         const resultFromAdmin = this.gameData.settlementResultFromAdmin[player.profile.name];
@@ -104,6 +104,9 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
         if (round.freeSpin && newResult === null) {
             newResult = this.roundCalculator.processSpinning2(round, maxWinPerRound, result, (result) => {
+                if (fromBuyFreeSpin === 2) {
+                    return this.boardGenerator.generateSuperFreeSpinBoard(result, false);
+                }
                 return this.boardGenerator.generateFreeSpinBoard(result, false);
             });
         }
@@ -131,7 +134,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
 
         return this.roundCalculator.processSpinning2(round, maxWinPerRound, new NgResult(), (result) => {
             if (buyFreeSpinMode !== 0) {
-                return this.boardGenerator.generateScatterBoardsRandom(result);
+                return this.boardGenerator.generateScatterBoardsRandom(result, buyFreeSpinMode);
             }
             return this.boardGenerator.generateBaseGameBoard(result);
         });
@@ -157,8 +160,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
 
         const { maxWinPerRound } = this.gameData.gameConfigs;
-        const maxWin = mathRound(maxWinPerRound * round.betLevel * round.coinValue * round.betMultiplier, 2);
-        return maxWin;
+        return mathRound(maxWinPerRound * round.betLevel * round.coinValue * round.betMultiplier, 2);
     }
 
     calculateBetResultFromAdmin(round: any, maxWinPerRound: number, resultFromAdmin: any) {
@@ -212,7 +214,7 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         }
         return count;
     }
-    async processFreeSpins(player, round, spinResult) {
+    async processFreeSpins(player, round, buyFreeSpin: number) {
         const { id, settlementResult, rootFreeSpinRoundId } = round;
         if (settlementResult.freeSpins?.odds > 0) {
             await this.freeSpinsConsumer.gainFreeSpin(
@@ -239,7 +241,10 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
                 {
                     roundId: id,
                     currentStage: 0,
-                    reelMultipliers: this.boardGenerator.initializeGridMultiplier(),
+                    reelMultipliers:
+                        buyFreeSpin === 2
+                            ? this.boardGenerator.initializeGridMultiplierForSuperFreeSpin()
+                            : this.boardGenerator.initializeGridMultiplier(),
                     stageQueue: [],
                     rageMeter: 0,
                     remainingMaxWin: maxWin - round.betWin,

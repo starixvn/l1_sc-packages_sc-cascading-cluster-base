@@ -92,7 +92,7 @@ describe("cascadingProcessBetQueue", () => {
                 expect(actualResult).toStrictEqual({
                     ...payloadWithBuyFreeSpin,
                     betMultiplier: (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier,
-                    totalAmount: payload.betLevel * payload.coinValue * (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier * 50,
+                    totalAmount: payload.betLevel * payload.coinValue * (gameData.gameConfigs as any).cascadingClusterConfig.betMultiplier * 100,
                 });
             });
         });
@@ -217,7 +217,7 @@ describe("cascadingProcessBetQueue", () => {
             await consumer.handleSuccessBet(player, balance, roundId, bet, []);
 
             // Assert
-            expect(settleGameRoundConsumer.settlePlayerRound).toHaveBeenCalledWith(player, roundId, (bet as any).buyFreeSpin);
+            expect(settleGameRoundConsumer.settlePlayerRound).toHaveBeenCalledWith(player, roundId, (bet as any).buyFreeSpin, 0);
         });
     });
 

@@ -5,6 +5,5 @@ import Prize from "../cluster-board/prize";
 import Result, { ResultCategory } from "../cluster-board/result";
 import RoundCalculator, { TumbleRecord } from "../cluster-board/round-calculator";
 import CascadingClusterGameData from "../game-data";
-import Statistician from "./Statistician";
 
-export { BoardGenerator, CascadingClusterGameData, FgResult, NgResult, Prize, Result, ResultCategory, RoundCalculator, Statistician, TumbleRecord };
+export { BoardGenerator, CascadingClusterGameData, FgResult, NgResult, Prize, Result, ResultCategory, RoundCalculator, TumbleRecord };

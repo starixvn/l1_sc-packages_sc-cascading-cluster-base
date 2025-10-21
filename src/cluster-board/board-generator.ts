@@ -9,10 +9,15 @@ export default class BoardGenerator {
     private readonly gridSize: number = 6;
     private readonly chance: Chance.Chance;
     private readonly notWinSymbolSets: number[];
+    private readonly buyFreeSpinMode: Record<number, number[]>;
 
     constructor() {
         this.chance = new Chance();
         this.notWinSymbolSets = [0, 1, 2, 3, 4, 5, 6, 7].map((symbol) => Array.from({ length: 4 }, () => symbol)).flat();
+        this.buyFreeSpinMode = {
+            1: Config.scatterWeight,
+            2: Config.scatterWeightForSupper,
+        };
     }
 
     public generateNormalGameBoard(): Result {
@@ -28,6 +33,14 @@ export default class BoardGenerator {
         fgResult.reelSetIndex = this.chance.weighted(FgReels.reelsIndex, FgReels.weight);
         this.genGrid(FgReels.reels[fgResult.reelSetIndex], fgResult);
         fgResult.gridMultipliers = resetMultiplier ? this.initializeGridMultiplier() : fgResult.gridMultipliers;
+
+        return fgResult;
+    }
+
+    public generateSuperFreeSpinBoard(fgResult: Result, resetMultiplier = true): Result {
+        fgResult.reelSetIndex = this.chance.weighted(FgReels.reelsIndex, FgReels.superWeight);
+        this.genGrid(FgReels.reels[fgResult.reelSetIndex], fgResult);
+        fgResult.gridMultipliers = resetMultiplier ? this.initializeGridMultiplierForSuperFreeSpin() : fgResult.gridMultipliers;
 
         return fgResult;
     }
@@ -84,6 +97,17 @@ export default class BoardGenerator {
         ];
     }
 
+    public initializeGridMultiplierForSuperFreeSpin(): number[][] {
+        return [
+            [1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1],
+        ];
+    }
+
     private genGrid(reelSet: number[][], result: Result): void {
         result.reels = [];
         for (let i = 0; i < this.gridSize; i++) {
@@ -114,8 +138,8 @@ export default class BoardGenerator {
         return result;
     }
 
-    generateScatterBoardsRandom(result: Result): Result {
-        const numberOfScatterRandom = this.chance.weighted(Config.scatterCounts, Config.scatterWeightForSupper);
+    generateScatterBoardsRandom(result: Result, buyFreeSpinMode: number): Result {
+        const numberOfScatterRandom = this.chance.weighted(Config.scatterCounts, this.buyFreeSpinMode[buyFreeSpinMode]);
         result.gridMultipliers = this.initializeGridMultiplier();
         result.featureQueue = [];
         return this.generateScatterBoards(result, numberOfScatterRandom);
