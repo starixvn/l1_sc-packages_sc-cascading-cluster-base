@@ -155,7 +155,7 @@ describe("SettleGameRoundConsumer", () => {
             });
 
             // Act
-            const result = await consumer.settlePlayerRound(player, 1, 0);
+            const result = await consumer.settlePlayerRound(player, 1, 0, 0);
 
             // Assert
             expect(result).toEqual({ betWin: round.betWin, reachMaxWin: round.reachMaxWin });
@@ -171,7 +171,7 @@ describe("SettleGameRoundConsumer", () => {
             roundsRepository.findOne().exec.mockReturnValueOnce(null);
 
             // Act
-            const result = await consumer.settlePlayerRound(player, 999, 0);
+            const result = await consumer.settlePlayerRound(player, 999, 0, 0);
 
             // Assert
             expect(result).toEqual({ betWin: 0, reachMaxWin: false });
@@ -193,7 +193,7 @@ describe("SettleGameRoundConsumer", () => {
             });
 
             // Act
-            const result = await consumer.settlePlayerRound(player, 1, 0);
+            const result = await consumer.settlePlayerRound(player, 1, 0, 0);
 
             // Assert
             expect(result).toEqual({ betWin: round.betWin, reachMaxWin: true });
@@ -216,7 +216,7 @@ describe("SettleGameRoundConsumer", () => {
             roundCalculator.processSpinning2.mockReturnValue(spinResult);
 
             // Act
-            const result = await consumer.settlePlayerRound(player, 1, 0);
+            const result = await consumer.settlePlayerRound(player, 1, 0, 0);
 
             // Assert
             expect(result).toEqual({ betWin: round.betWin, reachMaxWin: round.reachMaxWin });
@@ -281,7 +281,7 @@ describe("SettleGameRoundConsumer", () => {
             roundCalculator.processSpinning2.mockReturnValue(spinResult);
 
             // Act
-            const result = await consumer.processSpinning(player, round as any, 0);
+            const result = await consumer.processSpinning(player, round as any, 0, 0);
 
             // Assert
             expect(roundCalculator.processSpinning2).toHaveBeenCalled();
@@ -303,7 +303,7 @@ describe("SettleGameRoundConsumer", () => {
             roundCalculator.processSpinning2.mockReturnValue(spinResult);
 
             // Act
-            const result = await consumer.processSpinning(player, round as any, 0);
+            const result = await consumer.processSpinning(player, round as any, 0, 0);
 
             // Assert
             expect(freeSpinStateConsumer.updateFreeSpinState).toHaveBeenCalled();
@@ -326,7 +326,7 @@ describe("SettleGameRoundConsumer", () => {
             roundCalculator.processSpinning2.mockReturnValue(spinResult);
 
             // Act
-            const result = await consumer.processSpinning(player, round as any, 1);
+            const result = await consumer.processSpinning(player, round as any, 1, 0);
 
             // Assert
             expect(roundCalculator.processSpinning2).toHaveBeenCalled();
@@ -347,7 +347,7 @@ describe("SettleGameRoundConsumer", () => {
             gameData.settlementResultFromAdmin[player.profile.name] = adminResult;
 
             // Act
-            const result = await consumer.processSpinning(player, round as any, 0);
+            const result = await consumer.processSpinning(player, round as any, 0, 0);
 
             // Assert
             expect(round.settlementResult).toBeDefined();
@@ -466,7 +466,7 @@ describe("SettleGameRoundConsumer", () => {
             };
 
             // Act
-            await consumer.processFreeSpins(player, round, spinResult);
+            await consumer.processFreeSpins(player, round, 0);
 
             // Assert
             expect(freeSpinsConsumer.gainFreeSpin).toHaveBeenCalledWith(
@@ -497,7 +497,7 @@ describe("SettleGameRoundConsumer", () => {
             round.betWin = 100;
 
             // Act
-            await consumer.processFreeSpins(player, round, spinResult);
+            await consumer.processFreeSpins(player, round, 0);
 
             // Assert
             expect(freeSpinStateConsumer.updateFreeSpinState).toHaveBeenCalledWith(
@@ -521,7 +521,7 @@ describe("SettleGameRoundConsumer", () => {
             freeSpinsConsumer.getTotalAvailableFreeSpins.mockReturnValue(0);
 
             // Act
-            await consumer.processFreeSpins(player, round, {});
+            await consumer.processFreeSpins(player, round, 0);
 
             // Assert
             expect(freeSpinStateConsumer.stopChain).toHaveBeenCalledWith(player);
