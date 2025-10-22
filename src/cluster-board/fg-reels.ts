@@ -1,7 +1,7 @@
 class FgReels {
     public static readonly reelsIndex: number[] = [0, 1, 2];
-    public static readonly weight: number[] = [325, 170, 111];
-    public static readonly superWeight: number[] = [325, 57, 24];
+    public static readonly weight: number[] = [325, 57, 24];
+    public static readonly superWeight: number[] = [325, 170, 111];
     public static readonly reels: number[][][] = [
         [
             [
