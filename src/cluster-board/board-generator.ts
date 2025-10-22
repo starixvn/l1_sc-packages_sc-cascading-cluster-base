@@ -122,16 +122,16 @@ export default class BoardGenerator {
 
     generateScatterBoards(result: Result, numberOfScatter: number): Result {
         result.reels = [];
-        const sample = [
+        let sample = [
             ...Array.from({ length: numberOfScatter }, () => Config.scatterSymbol),
             ...this.chance.pickset(this.notWinSymbolSets, this.gridSize * this.gridSize - numberOfScatter),
         ];
+        sample = this.chance.shuffle(sample);
         for (let i = 0; i < this.gridSize; i++) {
             result.reels.push([]);
             for (let j = 0; j < this.gridSize; j++) {
-                const index = this.chance.integer({ min: 0, max: sample.length - 1 });
-                result.reels[i].push(new Grid(sample[index]));
-                sample.splice(index, 1);
+                const index = sample.shift();
+                result.reels[i].push(new Grid(index));
             }
         }
 
