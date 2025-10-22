@@ -15,8 +15,8 @@ class Config {
     public static readonly phase4replaceSymbol = [0, 1, 2, 3];
     public static readonly phase4replaceSymbolWeight = [10, 12, 14, 16];
 
-    public static readonly scatterWeightForSupper: number[] = [800, 152, 30, 10];
-    public static readonly scatterWeight: number[] = [72, 21, 5, 2];
+    public static readonly scatterWeightForSupper: number[] = [783, 265, 10, 5];
+    public static readonly scatterWeight: number[] = [859, 150, 20, 10];
     public static readonly scatterCounts: number[] = [3, 4, 5, 6];
 }
 
