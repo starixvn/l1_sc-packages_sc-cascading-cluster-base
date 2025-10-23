@@ -52,47 +52,7 @@ export default class FreeSpinsConsumer extends EventConsumers.FreeSpinsConsumer 
         return this.gameData.ingame[player.profile.name]?.freeSpins?.some((freeSpin) => freeSpin.available > 0 && !freeSpin.reachMaxWin) ?? false;
     }
 
-    async settleExpiredFreeSpins(expiredFreeSpins) {
-        const freeSpinsGroupedByNames = this.groupFreeSpinsByNames(expiredFreeSpins) as Record<string, FreeSpin[]>;
-
-        await Promise.all(
-            Object.entries(freeSpinsGroupedByNames).map(async ([name, loadedFreeSpins]) => {
-                const round = await this.roundsRepository.findOne({ id: loadedFreeSpins[0].roundId }).lean().exec();
-                const userSession = await this.userSessionsRepository
-                    .findOne({ playerId: round.playerId }, "ip operatorToken")
-                    .sort({ _id: -1 })
-                    .lean()
-                    .exec();
-                const player = {
-                    UID: round.uid,
-                    profile: {
-                        name: name,
-                    },
-                    session: {
-                        currencyName: round.currency,
-                        operatorId: round.operatorId,
-                        siteId: round.siteId,
-                        playerId: round.playerId,
-                        multiplier: round.betMultiplier,
-                        currencyCode: round.currencyCode,
-                        currencyGroupId: round.currencyGroupId,
-                        ip: userSession.ip,
-                        operatorToken: userSession.operatorToken,
-                    },
-                };
-
-                if (player.session.currencyGroupId && player.session.currencyCode) {
-                    this.initPlayerFreeSpins(name, loadedFreeSpins);
-
-                    const totalFreeSpins = loadedFreeSpins.reduce((sum, freeSpin) => sum + freeSpin.available, 0);
-
-                    this.gameData.ingame[name].betQueue.push(
-                        ...Array.from({ length: totalFreeSpins }).fill({ player, payload: { freeSpin: true, autoSettle: true } })
-                    );
-                }
-            })
-        );
-    }
+    async settleExpiredFreeSpins(expiredFreeSpins) {}
 
     cacheExpiredFreeSpins(expiredFreeSpins) {
         const freeSpinsGroupedByNames = this.groupFreeSpinsByNames(expiredFreeSpins);
