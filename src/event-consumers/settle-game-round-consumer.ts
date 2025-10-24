@@ -99,7 +99,16 @@ export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.Set
         let newResult = null;
         if (resultFromAdmin) {
             newResult = this.calculateBetResultFromAdmin(round, maxWinPerRound, resultFromAdmin);
-            delete this.gameData.settlementResultFromAdmin[player.profile.name];
+            const { freeSpinRounds } = resultFromAdmin as { freeSpinRounds?: any[] };
+            if (freeSpinRounds && freeSpinRounds.length > 0) {
+                const firstItem = freeSpinRounds[0];
+                this.gameData.settlementResultFromAdmin[player.profile.name] = {
+                    ...firstItem,
+                    freeSpinRounds: freeSpinRounds.slice(1),
+                };
+            } else {
+                delete this.gameData.settlementResultFromAdmin[player.profile.name];
+            }
         }
 
         if (round.freeSpin && newResult === null) {
