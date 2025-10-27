@@ -5,15 +5,14 @@ import NgReels from "./ng-reels";
 import NgResult from "./ng-result";
 import Result, { ResultCategory } from "./result";
 import Config from "./config";
+import { BuyFgReels } from "./buy-fg-reels";
 export default class BoardGenerator {
     private readonly gridSize: number = 6;
     private readonly chance: Chance.Chance;
-    private readonly notWinSymbolSets: number[];
     private readonly buyFreeSpinMode: Record<number, number[]>;
 
     constructor() {
         this.chance = new Chance();
-        this.notWinSymbolSets = [0, 1, 2, 3, 4, 5, 6, 7].map((symbol) => Array.from({ length: 4 }, () => symbol)).flat();
         this.buyFreeSpinMode = {
             1: Config.scatterWeight,
             2: Config.scatterWeightForSupper,
@@ -120,28 +119,25 @@ export default class BoardGenerator {
         }
     }
 
-    generateScatterBoards(result: Result, numberOfScatter: number): Result {
-        result.reels = [];
-        let sample = [
-            ...Array.from({ length: numberOfScatter }, () => Config.scatterSymbol),
-            ...this.chance.pickset(this.notWinSymbolSets, this.gridSize * this.gridSize - numberOfScatter),
-        ];
-        sample = this.chance.shuffle(sample);
-        for (let i = 0; i < this.gridSize; i++) {
-            result.reels.push([]);
-            for (let j = 0; j < this.gridSize; j++) {
-                const index = sample.shift();
-                result.reels[i].push(new Grid(index));
-            }
+    insertScatterSymbols(result: Result, numberOfScatter: number): void {
+        const scatterIndexes = this.chance.pickset(
+            Array.from({ length: this.gridSize * this.gridSize }, (_, index) => index),
+            numberOfScatter
+        );
+        for (const index of scatterIndexes) {
+            result.reels[Math.floor(index / this.gridSize)][index % this.gridSize].symbol = Config.scatterSymbol;
         }
-
-        return result;
     }
 
     generateScatterBoardsRandom(result: Result, buyFreeSpinMode: number): Result {
         const numberOfScatterRandom = this.chance.weighted(Config.scatterCounts, this.buyFreeSpinMode[buyFreeSpinMode]);
         result.gridMultipliers = this.initializeGridMultiplier();
         result.featureQueue = [];
-        return this.generateScatterBoards(result, numberOfScatterRandom);
+        result.reelSetIndex = 1;
+
+        this.genGrid(BuyFgReels.reels[result.reelSetIndex], result);
+        this.insertScatterSymbols(result, numberOfScatterRandom);
+
+        return result;
     }
 }
