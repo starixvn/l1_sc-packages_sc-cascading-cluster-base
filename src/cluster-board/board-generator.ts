@@ -10,9 +10,11 @@ export default class BoardGenerator {
     private readonly gridSize: number = 6;
     private readonly chance: Chance.Chance;
     private readonly buyFreeSpinMode: Record<number, number[]>;
+    private readonly indexScatterSets: number[];
 
     constructor() {
         this.chance = new Chance();
+        this.indexScatterSets = Array.from({ length: this.gridSize * this.gridSize }, (_, index) => index);
         this.buyFreeSpinMode = {
             1: Config.scatterWeight,
             2: Config.scatterWeightForSupper,
@@ -120,10 +122,7 @@ export default class BoardGenerator {
     }
 
     insertScatterSymbols(result: Result, numberOfScatter: number): void {
-        const scatterIndexes = this.chance.pickset(
-            Array.from({ length: this.gridSize * this.gridSize }, (_, index) => index),
-            numberOfScatter
-        );
+        const scatterIndexes = this.chance.pickset(this.indexScatterSets, numberOfScatter);
         for (const index of scatterIndexes) {
             result.reels[Math.floor(index / this.gridSize)][index % this.gridSize].symbol = Config.scatterSymbol;
         }
