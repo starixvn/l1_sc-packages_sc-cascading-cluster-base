@@ -284,7 +284,7 @@ export default class RoundCalculator {
             for (let j = 0; j < this.gridSize; j++) {
                 if (result.reels[i][j].symbol >= 4 && result.reels[i][j].symbol <= 7) {
                     result.reels[i][j].symbol = this.chance.weighted(Config.phase4replaceSymbol, Config.phase4replaceSymbolWeight);
-                    detonatedPositions.push(new Coordinate(i, j, result.reels[i][j].symbol));
+                    detonatedPositions.push(new Coordinate(i, j));
                 }
             }
         }
