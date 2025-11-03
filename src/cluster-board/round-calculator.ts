@@ -7,6 +7,7 @@ import Coordinate from "./coordinate";
 import Grid from "./grid";
 import Prize from "./prize";
 import Result, { ResultCategory } from "./result";
+import { SymbolCoordinate } from "./symbol-coordinate";
 
 export interface TumbleRecord {
     reels: number[][];
@@ -33,7 +34,7 @@ export default class RoundCalculator {
     private readonly gameData: CascadingClusterGameData;
     private readonly chance: Chance.Chance;
 
-    private readonly stageProcessors = new Map<number, (result: Result) => Coordinate[]>([
+    private readonly stageProcessors = new Map<number, (result: Result) => { triggeredPositions: Coordinate[]; newSymbols: number[][] }>([
         [1, (result) => this.processStage1(result)],
         [2, (result) => this.processStage2(result)],
         [3, (result) => this.processStage3(result)],
@@ -85,7 +86,7 @@ export default class RoundCalculator {
 
             while (prizeList.length === 0 && !result.isQueueEmpty()) {
                 // Process Rage Meter
-                const { feature, triggeredPositions } = this.processRageMeter(result);
+                const { feature, triggeredPositions, newSymbols } = this.processRageMeter(result);
 
                 result.tumbles.push(
                     this.recordTumble({
@@ -95,6 +96,7 @@ export default class RoundCalculator {
                         win: 0,
                         triggeredStage: feature,
                         triggeredPositions,
+                        newSymbols,
                     })
                 );
 
@@ -150,7 +152,7 @@ export default class RoundCalculator {
             this.calcPrize(newResult, prizeList);
 
             while (prizeList.length === 0 && !newResult.isQueueEmpty() && newResult.winScore < maxWinPerRound) {
-                const { feature, triggeredPositions } = this.processRageMeter(newResult);
+                const { feature, triggeredPositions, newSymbols } = this.processRageMeter(newResult);
 
                 newResult.tumbles.push(
                     this.recordTumble({
@@ -160,6 +162,7 @@ export default class RoundCalculator {
                         win: 0,
                         triggeredStage: feature,
                         triggeredPositions,
+                        newSymbols,
                     })
                 );
 
@@ -262,34 +265,36 @@ export default class RoundCalculator {
     private processRageMeter(result: Result): {
         feature?: number;
         triggeredPositions?: Coordinate[];
+        newSymbols?: number[][];
     } {
         if (!result.isQueueEmpty()) {
             const feature = result.pollFromQueue();
             result.featureTriggered[feature]++;
             const stageProcessor = this.stageProcessors.get(feature);
-            const triggeredPositions = stageProcessor(result);
+            const { triggeredPositions, newSymbols } = stageProcessor(result);
 
             return { feature, triggeredPositions };
         }
         return {};
     }
 
-    private processStage4(result: Result): Coordinate[] {
+    private processStage4(result: Result): { triggeredPositions: SymbolCoordinate[]; newSymbols: number[][] } {
         // Remove small symbols
-        const detonatedPositions: Coordinate[] = [];
+        const detonatedPositions: SymbolCoordinate[] = [];
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 if (result.reels[i][j].symbol >= 4 && result.reels[i][j].symbol <= 7) {
                     result.reels[i][j].symbol = this.chance.weighted(Config.phase4replaceSymbol, Config.phase4replaceSymbolWeight);
-                    detonatedPositions.push(new Coordinate(i, j));
+                    detonatedPositions.push(new SymbolCoordinate(i, j, result.reels[i][j].symbol));
                 }
             }
         }
 
-        return detonatedPositions;
+        const newSymbols = this.boardGenerator.detonateAndCascadeBoard(result);
+        return { triggeredPositions: detonatedPositions, newSymbols };
     }
 
-    private processStage3(result: Result): Coordinate[] {
+    private processStage3(result: Result): { triggeredPositions: Coordinate[]; newSymbols: number[][] } {
         // Rand select 2 col to remove
         const detonatedPositions: Coordinate[] = [];
         const colIndex = [0, 1, 2, 3, 4, 5];
@@ -307,11 +312,11 @@ export default class RoundCalculator {
                 detonatedPositions.push(new Coordinate(col2, j));
             }
         }
-        this.boardGenerator.detonateAndCascadeBoard(result);
-        return detonatedPositions;
+        const newSymbols = this.boardGenerator.detonateAndCascadeBoard(result);
+        return { triggeredPositions: detonatedPositions, newSymbols };
     }
 
-    private processStage2(result: Result): Coordinate[] {
+    private processStage2(result: Result): { triggeredPositions: Coordinate[]; newSymbols: number[][] } {
         // remove 3 x 3 (excl. SC)
         const detonatedPositions: Coordinate[] = [];
         const x = this.chance.integer({ min: 0, max: this.gridSize - 3 });
@@ -325,11 +330,11 @@ export default class RoundCalculator {
                 }
             }
         }
-        this.boardGenerator.detonateAndCascadeBoard(result);
-        return detonatedPositions;
+        const newSymbols = this.boardGenerator.detonateAndCascadeBoard(result);
+        return { triggeredPositions: detonatedPositions, newSymbols };
     }
 
-    private processStage1(result: Result): Coordinate[] {
+    private processStage1(result: Result): { triggeredPositions: Coordinate[]; newSymbols: number[][] } {
         const validPositions: Coordinate[] = [];
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
@@ -352,8 +357,8 @@ export default class RoundCalculator {
             detonatedPositions.push(pos);
         }
 
-        this.boardGenerator.detonateAndCascadeBoard(result);
-        return detonatedPositions;
+        const newSymbols = this.boardGenerator.detonateAndCascadeBoard(result);
+        return { triggeredPositions: detonatedPositions, newSymbols };
     }
 
     private calcRageMeter(prizeList: Prize[]): number {
