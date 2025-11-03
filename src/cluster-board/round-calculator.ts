@@ -7,7 +7,6 @@ import Coordinate from "./coordinate";
 import Grid from "./grid";
 import Prize from "./prize";
 import Result, { ResultCategory } from "./result";
-import { SymbolCoordinate } from "./symbol-coordinate";
 
 export interface TumbleRecord {
     reels: number[][];
@@ -273,19 +272,19 @@ export default class RoundCalculator {
             const stageProcessor = this.stageProcessors.get(feature);
             const { triggeredPositions, newSymbols } = stageProcessor(result);
 
-            return { feature, triggeredPositions };
+            return { feature, triggeredPositions, newSymbols };
         }
         return {};
     }
 
-    private processStage4(result: Result): { triggeredPositions: SymbolCoordinate[]; newSymbols: number[][] } {
+    private processStage4(result: Result): { triggeredPositions: Coordinate[]; newSymbols: number[][] } {
         // Remove small symbols
-        const detonatedPositions: SymbolCoordinate[] = [];
+        const detonatedPositions: Coordinate[] = [];
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
                 if (result.reels[i][j].symbol >= 4 && result.reels[i][j].symbol <= 7) {
                     result.reels[i][j].symbol = this.chance.weighted(Config.phase4replaceSymbol, Config.phase4replaceSymbolWeight);
-                    detonatedPositions.push(new SymbolCoordinate(i, j, result.reels[i][j].symbol));
+                    detonatedPositions.push(new Coordinate(i, j, result.reels[i][j].symbol));
                 }
             }
         }
